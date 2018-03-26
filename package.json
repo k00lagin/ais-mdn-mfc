@@ -1,0 +1,21 @@
+{
+  "main": "app/index.html",
+  "name": "mrsmfc",
+  "description": "monitoring",
+  "version": "0.0.3b",
+  "keywords": [ "monitoring" ],
+  "window": {
+    "title": "Мониторинг развития сети МФЦ",
+    "icon": "icon.png",
+    "toolbar": true,
+    "frame": true,
+    "width": 800,
+    "height": 500,
+    "position": "center",
+    "min_width": 800,
+    "min_height": 500
+  },
+  "webkit": {
+    "plugin": true
+  }
+}
