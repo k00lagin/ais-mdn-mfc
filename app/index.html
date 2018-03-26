@@ -217,23 +217,11 @@ var templateView = Vue.component('template-view', {
 		return {
 			searchQuery: '',
 			templateType: 2,
+			month: null,
+			year: null,
 		}
 	},
 	computed: {
-		month: function() {
-			return((new Date).getMonth() || 12)
-			/*var month = (new Date).getMonth() - 1;
-			if (month < 0) {
-				month = 11;
-			}
-			return(month + 1);*/
-		},
-		year: function() {
-			if (this.month == 12) {
-				return((new Date).getFullYear() - 1);
-			}
-			return((new Date).getFullYear());
-		},
 		gridColumns: function() {
 			return(app[this.columns]);
 		},
@@ -259,6 +247,15 @@ var templateView = Vue.component('template-view', {
 		handleIsFavoriteOnlyChange: function(e) {
 			localStorage.setItem( "isFavoriteOnly", e.target.checked )
 		},
+	},
+	mounted: function() {
+		this.month = (new Date).getMonth() || 12;
+		if (this.month == 12) {
+			this.year = (new Date).getFullYear() - 1;
+		}
+		else {
+			this.year = (new Date).getFullYear();
+		}		
 	},
 	created: function() {
 		if (!app.mfcList) {
@@ -750,20 +747,6 @@ var commonDataView = Vue.component('common_data-view', {
 				]
 			},
 			computed: {
-				month: function() {
-					return((new Date).getMonth() || 12);
-					/*var month = (new Date).getMonth() - 1;
-					if (month < 0) {
-						month = 11;
-					}
-					return(month + 1);*/
-				},
-				year: function() {
-					if (this.month == 12) {
-						return((new Date).getFullYear() - 1);
-					}
-					return((new Date).getFullYear());
-				},
 				favoriteList: {
 					get: function() {
 						return( JSON.parse( localStorage.getItem( 'favoriteList' ) || '{}' ) );
