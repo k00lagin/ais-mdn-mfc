@@ -506,18 +506,17 @@ var commonDataView = Vue.component('common_data-view', {
 		</header>
 		<div v-if="currentUser" class="main">
 			<div class="menu">
-				<nav>
-					<span>Шаблоны</span><br>
-						<router-link to="/mfc_template_list" class="button">МФЦ</router-link><br>
-						<router-link to="/urm_template_list" class="button">ТОСП</router-link><br>
-						<!--<button type="button" v-on:click="go('mfc_template_list')">МФЦ</button><br>
-						<button type="button" v-on:click="go('urm_template_list')">ТОСП</button><br>-->
-					<span>Подсистемы сбора информации</span><br>
-						<router-link to="/mfc_common_data" class="button">МФЦ</router-link><br>
-						<router-link to="/urm_common_data" class="button">ТОСП</router-link><br>
-						<!--<button type="button" v-on:click="go('mfc_common_data')">МФЦ</button><br>
-						<button type="button" v-on:click="go('urm_common_data')">ТОСП</button>-->
-				</nav>
+				<at-menu mode="vertical" router="router">
+					<at-menu-item-group title="Шаблоны">
+						<at-menu-item to="/mfc_template_list">МФЦ</at-menu-item>
+						<at-menu-item to="/urm_template_list">ТОСП</at-menu-item>
+					</at-menu-item-group>
+					<at-menu-item-group title="Подсистемы сбора информации">
+							<at-menu-item to="/mfc_common_data">МФЦ</at-menu-item>
+							<at-menu-item to="/urm_common_data">ТОСП</at-menu-item>
+						</at-menu-item-group>
+				</at-menu>
+				<span class="version">v:{{ version }}</span>
 			</div>
 			<router-view class="display" style="overflow-y: auto; overflow-x: hidden;"></router-view>
 		</div>
@@ -793,6 +792,9 @@ var commonDataView = Vue.component('common_data-view', {
 				]
 			},
 			computed: {
+				version: function() {
+					return(nw.App.manifest.version)
+				},
 				favoriteList: {
 					get: function() {
 						return( JSON.parse( localStorage.getItem( 'favoriteList' ) || '{}' ) );
