@@ -36,6 +36,36 @@
 					.catch((error) => {
 						throw new Error(error);
 					});
+			},
+			sendMultiformData: function(url, form, callback) {
+				var formData  = new FormData(form);
+
+				fetch(url, {
+					credentials: "same-origin",
+					method: 'POST',
+					body: formData
+				})
+				.then((response) => {
+						if(!response.ok) {
+							throw new Error('Network response was not ok');
+						}
+						response.json().then(function(data) {
+							console.log(data);
+							if (data.success) {
+								app.$Message.success({
+									message:data.data[0],
+									duration: 3000
+								});
+							}
+							else {
+								app.$Message.error({
+									message:data.data[0],
+									duration: 9000
+								});
+
+							}
+						});
+				});
 			}
 		  }
 		}
@@ -249,6 +279,18 @@ var templateView = Vue.component('template-view', {
 		handleIsFavoriteOnlyChange: function(e) {
 			localStorage.setItem( "isFavoriteOnly", e.target.checked )
 		},
+		handleFileSelect: function(e) {
+			document.getElementById('uploadFilename').value=e.target.files[0].name;
+			this.files[0] = {
+				name: e.target.files[0].name,
+				data: fs.readFileSync(e.target.files[0].path)
+			};
+			this.uploadTemplate();
+		},
+		uploadTemplate: function() {
+			let form = document.getElementById('uploadTemplate');
+			this.sendMultiformData('https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData', form);
+		}
 	},
 	mounted: function() {
 		this.month = (new Date).getMonth() || 12;
@@ -364,8 +406,6 @@ var commonDataView = Vue.component('common_data-view', {
 						<label tabindex="0" title="Федеральные" class="templateDownloadLabel">Ф<input style="display: none;" type="file" :nwsaveas="'ФОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=federal&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" /></label>
 						<template v-if="$route.path == '/mfc_template_list'">
 							<label tabindex="0" title="Региональные" class="templateDownloadLabel">Р<input style="display: none;" type="file" :nwsaveas="'РОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=regional&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" /></label>
-
-
 							<label tabindex="0" title="Муниципальное" class="templateDownloadLabel">М<input style="display: none;" type="file" :nwsaveas="'МОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=municipal&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" /></label>
 						</template>
 						<label tabindex="0" class="templateDownloadLabel">И<input style="display: none;" type="file" :nwsaveas="'Иные услуги ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=otherServices&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" /></label>
@@ -410,6 +450,10 @@ var commonDataView = Vue.component('common_data-view', {
 				<option value="1">Полные</option>
 				<option selected="selected" value="2">Сокращённые</option>
 			</select>
+		</form>
+		<form @submit.prevent="uploadTemplate" id="uploadTemplate" method="post" action="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData" enctype="multipart/form-data" target="_blank">
+			<input id="uploadFilename" name="filename" type="hidden">
+			<label class="at-btn at-btn--default at-btn--small">Загрузить шаблон<input style="display:none" type="file" name="docFile" @change="handleFileSelect"></label>
 		</form>
 		<template-grid
 			:data="gridData"
