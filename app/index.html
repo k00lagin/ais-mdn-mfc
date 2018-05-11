@@ -358,7 +358,6 @@ var commonDataView = Vue.component('common_data-view', {
 		//страничка со всеми МФЦ https://моидокументы.рф/mfc/ws/cards/urm/getListWithProjection?query={%22common_data.status%22%3A%22%D0%B4%D0%B5%D0%B9%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9%22%2C%22common_data.rf_subject%22%3A80}&projection=common_data&page=1&start=0&limit=20
 		// инфа о конкретном МФЦ https://моидокументы.рф/mfc/ws/card/amm_sys_urm_card_form/common_data?_dc=1507099217843&id=10673
 	</script>
-<!-- component template -->
 <script type="text/x-template" id="user-settings">
 	<div>
 		<div v-for="field in userSettings">
@@ -483,7 +482,6 @@ var commonDataView = Vue.component('common_data-view', {
 		<header>
 			<div class="spacer"></div>
 			<template v-if="currentUser">
-				<!--<button v-on:click="go('userSettings')" class="userfio textBtn">{{ currentUser.fio }}</button>-->
 				<router-link to="/user_settings"  class="userfio textBtn">{{ currentUser.fio }}</router-link>
 				<a @click.prevent="logout" class="logout textBtn" href="https://моидокументы.рф/mfc/ws/auth/logout">Выход</a>
 			</template>
@@ -525,7 +523,7 @@ var commonDataView = Vue.component('common_data-view', {
 			{ path: '/user_settings', component: userSettings },
 		];
 		const router = new VueRouter({
-			routes // сокращение от `routes: routes`
+			routes
 		});
 		const fs = require('fs');
 		var app = new Vue({
@@ -919,7 +917,7 @@ var commonDataView = Vue.component('common_data-view', {
 								throw new Error('Network response was not ok');
 							}
 							response.json().then(function(data) {
-								newMfcList = []; //app.mfcList = data;
+								newMfcList = [];
 								data.items.forEach(function(item, i, arr) {
 									newMfcList[i] = item.common_data;
 									newMfcList[i].is_favorite = app.favoriteList && app.favoriteList[item._id] == true;
@@ -939,7 +937,7 @@ var commonDataView = Vue.component('common_data-view', {
 						headers: {
 							"Content-type": "application/json;charset=UTF-8"
 						},
-						body: '{disableAccessCheck: true, fields:["rf_subject_name"]}' //, query: {parent_id: 80}
+						body: '{disableAccessCheck: true, fields:["rf_subject_name"]}'
 					})
 						.then((response) => {
 							if(!response.ok) {
