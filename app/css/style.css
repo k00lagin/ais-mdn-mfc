@@ -2,7 +2,7 @@
 	--main_background-color: #fff;
 	--main_font-family: Segoe UI;
 	--main_font-color: #222222;
-	--spacer_color: grey;
+	--spacer_color: #e2ecf4;
 	--hover-color: rgba(0,0,0,.2);
 	--small_font-size: 12px;
 	--outline-color: rgba(0,0,0,.5);
@@ -37,17 +37,8 @@ header {
 	display: flex;
 	flex-flow: row nowrap;
 	padding: .5em;
+	height: 2em;
 	border-bottom: .5px solid var(--spacer_color);
-	height: 120px;
-	box-sizing: border-box;
-}
-
-.logo {
-	font-size: 1.2em;
-	font-style: italic;
-	width: 180px;
-	text-align: center;
-	padding: 10px;
 	box-sizing: border-box;
 }
 
@@ -76,7 +67,7 @@ header {
 .main {
 	display: flex;
 	flex-flow: row nowrap;
-	height: calc(100% - 120px);
+	height: calc(100% - 2em);
 }
 
 /*
