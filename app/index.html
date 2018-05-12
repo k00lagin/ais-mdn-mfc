@@ -448,7 +448,7 @@ var commonDataView = Vue.component('common_data-view', {
 		</form>
 		<form @submit.prevent="uploadTemplate" id="uploadTemplate" method="post" action="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData" enctype="multipart/form-data" target="_blank">
 			<input id="uploadFilename" name="filename" type="hidden">
-			<label class="at-btn at-btn--default at-btn--small">Загрузить шаблон<input style="display:none" type="file" name="docFile" @change="handleFileSelect"></label>
+			<label class="at-btn at-btn--default at-btn--small"><i class="icon icon-upload"></i>  Загрузить шаблон<input style="display:none" type="file" name="docFile" @change="handleFileSelect"></label>
 		</form>
 		<template-grid
 			:data="gridData"
