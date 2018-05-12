@@ -87,7 +87,6 @@ header {
 
 .display {
 	flex-grow: 1;
-	border: 1px solid var(--spacer_color);
 }
 
 th {
