@@ -8,6 +8,7 @@
 	<script src="js/vue-router.js"></script>
 	<link rel="stylesheet" href="css/style.css">
 	<script src="js/at.min.js"></script>
+	<script src="js/httpVueLoader.js"></script>
 </head>
 <body>
 	<script>
@@ -69,25 +70,6 @@
 			}
 		  }
 		}
-var userSettings = Vue.component('userSettings', {
-	template: '#user-settings',
-	props: {
-
-	},
-	computed: {
-		userSettings: function() {
-			return(app.userSettings);
-		},
-		currentUser: function() {
-			return(app.currentUser);
-		},
-	},
-	data: function () {
-    return {
-
-    }
-  }
-});
 Vue.component('schedule', {
 	template: '#schedule',
 	props: {
@@ -520,7 +502,7 @@ var commonDataView = Vue.component('common_data-view', {
 			{ path: '/urm_template_list', component: templateView, props: {list: 'urmList', columns: 'templateListColumns'} },
 			{ path: '/mfc_common_data', component: commonDataView, props: {list: 'mfcList', columns: 'commonDataColumns'} },
 			{ path: '/urm_common_data', component: commonDataView, props: {list: 'urmList', columns: 'commonDataColumns'} },
-			{ path: '/user_settings', component: userSettings },
+			{ path: '/user_settings', component: httpVueLoader('vue/user-settings.vue') },
 		];
 		const router = new VueRouter({
 			routes
@@ -983,48 +965,6 @@ var commonDataView = Vue.component('common_data-view', {
 							}
 							response.json().then(function(data) {
 								app.cardData = data;
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
-				},
-				updateFio: function(fio) {
-					fetch('https://моидокументы.рф/mfc/ws/auth/updateFio', {
-						credentials: "same-origin",
-						method: 'post',
-						headers: {
-							"Content-type": "application/json;charset=UTF-8"
-						},
-						body: '{fio: "' + fio + '"}'
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								app.updateLogin();
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
-				},
-				updatePassword: function(password) {
-					fetch('https://моидокументы.рф/mfc/ws/auth/updatePassword', {
-						credentials: "same-origin",
-						method: 'post',
-						headers: {
-							"Content-type": "application/json;charset=UTF-8"
-						},
-						body: '{password: "' + password + '"}'
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								app.updateLogin();
 							});
 						})
 						.catch((error) => {
