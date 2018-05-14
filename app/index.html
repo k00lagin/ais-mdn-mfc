@@ -405,7 +405,7 @@ var commonDataView = Vue.component('common_data-view', {
 </script>
 <script type="text/x-template" id="template-view">
 	<div>
-		<form id="search" style="display: flex; align-items: flex-end;">
+		<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
 			<at-checkbox v-model="isFavoriteOnly" @change="handleIsFavoriteOnlyChange" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
 			<div style="width: 200px; display: inline-block;"><at-input v-model="searchQuery" size="small">
 				<template slot="prepend">
@@ -437,12 +437,13 @@ var commonDataView = Vue.component('common_data-view', {
 					<at-option :value="2">Сокращённые</at-option>
 				</at-select>
 			</div>
+			<div class="spacer"></div>
+			<form @submit.prevent="uploadTemplate" id="uploadTemplate" method="post" action="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData" enctype="multipart/form-data" target="_blank">
+				<input id="uploadFilename" name="filename" type="hidden">
+				<label class="at-btn at-btn--primary at-btn--small"><i class="icon icon-upload"></i>  Загрузить шаблон<input style="display:none" type="file" name="docFile" @change="handleFileSelect"></label>
+			</form>
+		</div>
 
-		</form>
-		<form @submit.prevent="uploadTemplate" id="uploadTemplate" method="post" action="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData" enctype="multipart/form-data" target="_blank">
-			<input id="uploadFilename" name="filename" type="hidden">
-			<label class="at-btn at-btn--default at-btn--small"><i class="icon icon-upload"></i>  Загрузить шаблон<input style="display:none" type="file" name="docFile" @change="handleFileSelect"></label>
-		</form>
 		<template-grid
 			:data="gridData"
 			:columns="gridColumns"

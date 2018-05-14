@@ -255,7 +255,7 @@ td {
 	background-color: inherit;
 }
 
-#search .at-input--small input {
+#toolPanel .at-input--small input {
 	height: 26px;
 	font-size: 11px;
 }
