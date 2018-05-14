@@ -248,28 +248,14 @@ td {
 .templateDownloadLabel:hover {
 	background: rgba(0, 0, 0, .1);
 }
- 
-#search > select,
-#search input {
-    border: 0;
-    background: transparent;
-	border-bottom: 1px solid transparent;
-	transition: background .15s;
-}
-#search select:focus,
-#search input:focus {
-	background-color: #fff;
-}
-#search [name='year'] {
-	width: 50px;
-}
-#search > select:hover,
-#search input:hover {
-	border-bottom: 1px dashed var(--spacer_color);
-}
 
 /* AT */
 
 .at-menu {
 	background-color: inherit;
+}
+
+#search .at-input--small input {
+	height: 26px;
+	font-size: 11px;
 }

@@ -405,28 +405,39 @@ var commonDataView = Vue.component('common_data-view', {
 </script>
 <script type="text/x-template" id="template-view">
 	<div>
-		<form id="search">
-			<label><input type="checkbox" v-model="isFavoriteOnly" @change="handleIsFavoriteOnlyChange">Только избранное</label>
-			<label>Поиск <input name="query" v-model="searchQuery"></label>
-			<select name="month"  v-model="month">
-				<option value="1">Январь</option>
-				<option value="2">Февраль</option>
-				<option value="3">Март</option>
-				<option value="4">Апрель</option>
-				<option value="5">Май</option>
-				<option value="6">Июнь</option>
-				<option value="7">Июль</option>
-				<option value="8">Август</option>
-				<option value="9">Сентябрь</option>
-				<option value="10">Октябрь</option>
-				<option value="11">Ноябрь</option>
-				<option value="12">Декабрь</option>
-			</select>
-			<input type="number" name="year" v-model="year">
-			<select name="" id="" v-model="templateType">
-				<option value="1">Полные</option>
-				<option selected="selected" value="2">Сокращённые</option>
-			</select>
+		<form id="search" style="display: flex; align-items: flex-end;">
+			<at-checkbox v-model="isFavoriteOnly" @change="handleIsFavoriteOnlyChange" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
+			<div style="width: 200px; display: inline-block;"><at-input v-model="searchQuery" size="small">
+				<template slot="prepend">
+					<i class="icon icon-filter"></i>
+				</template>
+			</at-input></div>
+			<div style="width: 100px; display: inline-block;">
+				<at-select name="month"  v-model="month" size="small">
+					<at-option :value="1">Январь</at-option>
+					<at-option :value="2">Февраль</at-option>
+					<at-option :value="3">Март</at-option>
+					<at-option :value="4">Апрель</at-option>
+					<at-option :value="5">Май</at-option>
+					<at-option :value="6">Июнь</at-option>
+					<at-option :value="7">Июль</at-option>
+					<at-option :value="8">Август</at-option>
+					<at-option :value="9">Сентябрь</at-option>
+					<at-option :value="10">Октябрь</at-option>
+					<at-option :value="11">Ноябрь</at-option>
+					<at-option :value="12">Декабрь</at-option>
+				</at-select>
+			</div>
+			<div style="width: 80px; display: inline-block;">
+				<at-input v-model="year" size="small"></at-input>
+			</div>
+			<div style="width: 200px; display: inline-block;">
+				<at-select v-model="templateType" size="small">
+					<at-option :value="1">Полные</at-option>
+					<at-option :value="2">Сокращённые</at-option>
+				</at-select>
+			</div>
+
 		</form>
 		<form @submit.prevent="uploadTemplate" id="uploadTemplate" method="post" action="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData" enctype="multipart/form-data" target="_blank">
 			<input id="uploadFilename" name="filename" type="hidden">
@@ -518,7 +529,6 @@ var commonDataView = Vue.component('common_data-view', {
 				mfcList: null,
 				urmList: null,
 				gridColumns: null,
-	      		templateType: 2,
 	      		isFavoriteOnly: null,
 	      		dictionarySubjectName: null,
 			  	searchQuery: '',
