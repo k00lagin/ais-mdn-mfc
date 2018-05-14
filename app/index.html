@@ -459,10 +459,16 @@ var commonDataView = Vue.component('common_data-view', {
 </script>
 <script type="text/x-template" id="common_data-view">
 	<div>
-		<form id="search">
-			<label><input type="checkbox" v-model="isFavoriteOnly" @change="handleIsFavoriteOnlyChange">Только избранное</label>
-			<label>Поиск <input name="query" v-model="searchQuery"></label>
-		</form>
+			<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
+				<at-checkbox v-model="isFavoriteOnly" @change="handleIsFavoriteOnlyChange" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
+				<div style="width: 200px; display: inline-block;">
+					<at-input v-model="searchQuery" size="small">
+						<template slot="prepend">
+							<i class="icon icon-filter"></i>
+						</template>
+					</at-input>
+				</div>
+			</div>
 		<template-grid
 			:data="gridData"
 			:columns="gridColumns"
