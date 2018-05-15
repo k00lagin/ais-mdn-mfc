@@ -20,23 +20,42 @@
 		}
 		var commonMethods = {
 		  methods: {
+			fetchData: function(url, object, paramName) {
+				fetch(url, {
+						credentials: "same-origin",
+						headers: {
+							"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+						},
+				})
+				.then((response) => {
+					if (!response.ok) {
+						throw new Error('Network response was not ok');
+					}
+					response.json().then(function (data) {
+						object[paramName] = data;
+					});							
+				})
+				.catch((error) => {
+					throw new Error(error);
+				});
+			},
 			fetchAndSave: function(url, path) {
 				console.log(url, path);
 				fetch(url, {
 					credentials: "same-origin"
 				})
-					.then((response) => {
-						if(!response.ok) {
-							throw new Error('Network response was not ok');
-						}
-						return(response.arrayBuffer())
-					})
-					.then(function(buffer) {
-						fs.writeFile(path, Buffer(new Uint8Array(buffer)));
-					})
-					.catch((error) => {
-						throw new Error(error);
-					});
+				.then((response) => {
+					if(!response.ok) {
+						throw new Error('Network response was not ok');
+					}
+					return(response.arrayBuffer())
+				})
+				.then(function(buffer) {
+					fs.writeFile(path, Buffer(new Uint8Array(buffer)));
+				})
+				.catch((error) => {
+					throw new Error(error);
+				});
 			},
 			sendMultiformData: function(url, form, callback) {
 				var formData  = new FormData(form);
@@ -47,25 +66,25 @@
 					body: formData
 				})
 				.then((response) => {
-						if(!response.ok) {
-							throw new Error('Network response was not ok');
+					if(!response.ok) {
+						throw new Error('Network response was not ok');
+					}
+					response.json().then(function(data) {
+						console.log(data);
+						if (data.success) {
+							app.$Message.success({
+								message:'Успех!',
+								duration: 3000
+							});
 						}
-						response.json().then(function(data) {
-							console.log(data);
-							if (data.success) {
-								app.$Message.success({
-									message:'Успех!',
-									duration: 3000
-								});
-							}
-							else {
-								app.$Message.error({
-									message:data.data[0],
-									duration: 9000
-								});
+						else {
+							app.$Message.error({
+								message:data.data[0],
+								duration: 9000
+							});
 
-							}
-						});
+						}
+					});
 				});
 			}
 		  }
@@ -395,6 +414,10 @@ var commonDataView = Vue.component('common_data-view', {
 			<template v-else-if="key.field == 'address0'">
 				{{ entry[key.field].split(',').slice(entry[key.field].split(',').length-2).join(',') }}
 			</template>
+			<template v-else-if="key.field == 'full_name'">
+				<router-link v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'" :to="'/quarter_data_import/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry[key.field] }}</router-link>
+				<router-link v-if="$route.path == '/mfc_common_data' || $route.path == '/urm_common_data'" :to="'/common_data/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry[key.field] }}</router-link>
+			</template>
 			<template v-else-if="key.field == 'start_date'">
 				{{ entry[key.field] | date }}
 			</template>
@@ -524,6 +547,7 @@ var commonDataView = Vue.component('common_data-view', {
 			{ path: '/mfc_common_data', component: commonDataView, props: {list: 'mfcList', columns: 'commonDataColumns'} },
 			{ path: '/urm_common_data', component: commonDataView, props: {list: 'urmList', columns: 'commonDataColumns'} },
 			{ path: '/user_settings', component: httpVueLoader('vue/user-settings.vue') },
+			{ path:  '/quarter_data_import/:mouType/:mouId', component: httpVueLoader('vue/quarter-data-import-template.vue') },
 		];
 		const router = new VueRouter({
 			routes
@@ -907,6 +931,7 @@ var commonDataView = Vue.component('common_data-view', {
 									newUrmList[i] = item.common_data;
 									newUrmList[i].is_favorite = app.favoriteList && app.favoriteList[item._id] == true;
 									newUrmList[i].id = item._id;
+									newUrmList[i].mouType = 'urm';
 								});
 								app.urmList = newUrmList;
 							});
@@ -930,6 +955,7 @@ var commonDataView = Vue.component('common_data-view', {
 									newMfcList[i] = item.common_data;
 									newMfcList[i].is_favorite = app.favoriteList && app.favoriteList[item._id] == true;
 									newMfcList[i].id = item._id;
+									newMfcList[i].mouType = 'mfc';
 								});
 								app.mfcList = newMfcList;
 							});
