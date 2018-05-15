@@ -392,13 +392,16 @@ var commonDataView = Vue.component('common_data-view', {
         	<template v-else-if="key.field == 'urban_area' || key.field == 'urban_district'">
         		{{ dictionarySubjectName[entry[key.field]] }}
         	</template>
-        	<template v-else-if="key.field == 'address0'">
-        		{{ entry[key.field].split(',').slice(entry[key.field].split(',').length-2).join(',') }}
-        	</template>
-          <span v-else="">
-          	{{ entry[key.field] }}
-          </span>          
-        </td>
+			<template v-else-if="key.field == 'address0'">
+				{{ entry[key.field].split(',').slice(entry[key.field].split(',').length-2).join(',') }}
+			</template>
+			<template v-else-if="key.field == 'start_date'">
+				{{ entry[key.field] | date }}
+			</template>
+			<span v-else="">
+				{{ entry[key.field] }}
+			</span>          
+		</td>
       </tr>
     </tbody>
   </table>
@@ -459,16 +462,16 @@ var commonDataView = Vue.component('common_data-view', {
 </script>
 <script type="text/x-template" id="common_data-view">
 	<div>
-			<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-				<at-checkbox v-model="isFavoriteOnly" @change="handleIsFavoriteOnlyChange" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
-				<div style="width: 200px; display: inline-block;">
-					<at-input v-model="searchQuery" size="small">
-						<template slot="prepend">
-							<i class="icon icon-filter"></i>
-						</template>
-					</at-input>
-				</div>
+		<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
+			<at-checkbox v-model="isFavoriteOnly" @change="handleIsFavoriteOnlyChange" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
+			<div style="width: 200px; display: inline-block;">
+				<at-input v-model="searchQuery" size="small">
+					<template slot="prepend">
+						<i class="icon icon-filter"></i>
+					</template>
+				</at-input>
 			</div>
+		</div>
 		<template-grid
 			:data="gridData"
 			:columns="gridColumns"
@@ -525,6 +528,12 @@ var commonDataView = Vue.component('common_data-view', {
 		const router = new VueRouter({
 			routes
 		});
+		Vue.filter('date', function (value) {
+			if (!value) return '';
+			value = value.toString();
+			value.split('-')[0];
+			return(value.split('-')[2] + '.' + value.split('-')[1] + '.' + value.split('-')[0]);
+		})
 		const fs = require('fs');
 		var app = new Vue({
 			router,
