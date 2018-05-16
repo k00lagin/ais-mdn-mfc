@@ -9,6 +9,7 @@
 	<link rel="stylesheet" href="css/style.css">
 	<script src="js/at.min.js"></script>
 	<script src="js/httpVueLoader.js"></script>
+	<script src="js/vue2-filters.min.js"></script>
 </head>
 <body>
 	<script>
@@ -557,7 +558,15 @@ var commonDataView = Vue.component('common_data-view', {
 			value = value.toString();
 			value.split('-')[0];
 			return(value.split('-')[2] + '.' + value.split('-')[1] + '.' + value.split('-')[0]);
-		})
+		});
+		Vue.filter('datetime', function (value) {
+			if (!value) return '';
+			value = value.toString();
+			let date = value.split('T')[0];
+			let time = value.split('T')[1];
+			value.split('-')[0];
+			return(date.split('-')[2] + '.' + date.split('-')[1] + '.' + date.split('-')[0] + ' ' + time);
+		});
 		const fs = require('fs');
 		var app = new Vue({
 			router,

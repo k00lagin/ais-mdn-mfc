@@ -43,9 +43,9 @@
 				<tbody>
 					<template v-if="upload && upload.items">
 						<tr v-for="item in upload.items">
-							<td>{{ item.template.createDate }}</td>
+							<td>{{ item.template.createDate | datetime }}</td>
 							<td>{{ item.template.userId }}</td>
-							<td>{{ item.uploadFile.createDate }}</td>
+							<td>{{ item.uploadFile.createDate | datetime }}</td>
 							<td>{{ item.uploadFile.userId }}</td>
 							<td>
 								<a :href="'https://моидокументы.рф/mfc/ws/file/view/' + item.uploadFile.fileId">{{ item.uploadFile.fileName }}</a>
