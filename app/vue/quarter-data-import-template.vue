@@ -49,7 +49,8 @@
 							<td>{{ item.uploadFile.userId }}</td>
 							<td>
 								<a :href="'https://моидокументы.рф/mfc/ws/file/view/' + item.uploadFile.fileId">{{ item.uploadFile.fileName }}</a>
-								<span v-if="item.uploadFile.countErrors" style="background-color: red; display: inline-block; text-align: center; color: white; padding: 1px 6px; font-weight: 700;">{{ item.uploadFile.countErrors }}</span>
+								<at-badge v-if="item.uploadFile.countErrors" :value="item.uploadFile.countErrors"></at-badge>
+								<at-badge v-else status="success" value="✓"></at-badge>
 							</td>
 						</tr>
 					</template>
