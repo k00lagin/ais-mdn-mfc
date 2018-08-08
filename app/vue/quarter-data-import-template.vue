@@ -20,11 +20,8 @@
 			<div style="width: 80px; display: inline-block;">
 				<at-input v-model="year" size="small"></at-input>
 			</div>
-			<!--<div class="spacer"></div>
-			<form @submit.prevent="uploadTemplate" id="uploadTemplate" method="post" action="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData" enctype="multipart/form-data" target="_blank">
-				<input id="uploadFilename" name="filename" type="hidden">
-				<label class="at-btn at-btn--primary at-btn--small"><i class="icon icon-upload"></i>  Загрузить шаблон<input style="display:none" type="file" name="docFile" @change="handleFileSelect"></label>
-			</form>-->
+			<div class="spacer"></div>
+			<upload-template></upload-template>
 		</div>
 		<table style="width: calc(100% - 24px); margin: 12px; box-sizing: border-box;">
 			<template v-for="(upload, type) in uploads">
@@ -61,6 +58,9 @@
 </template>
 <script>
 	module.exports = {
+		components: {
+			'upload-template': httpVueLoader('vue/upload-template.vue'),
+		},
 		watch: {
 			'$route' (to, from) {
 				this.mouId = to.params.mouId;

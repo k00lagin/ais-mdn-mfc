@@ -240,7 +240,10 @@ var templateGrid = Vue.component('template-grid', {
 })
 var templateView = Vue.component('template-view', {
 	template: '#template-view',
-  	mixins: [commonMethods],
+	mixins: [commonMethods],
+	components: {
+		'upload-template': httpVueLoader('vue/upload-template.vue'),
+	},
 	props: {
 		list: String,
 		columns: String,
@@ -465,10 +468,7 @@ var commonDataView = Vue.component('common_data-view', {
 				</at-select>
 			</div>
 			<div class="spacer"></div>
-			<form @submit.prevent="uploadTemplate" id="uploadTemplate" method="post" action="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData" enctype="multipart/form-data" target="_blank">
-				<input id="uploadFilename" name="filename" type="hidden">
-				<label class="at-btn at-btn--primary at-btn--small"><i class="icon icon-upload"></i>  Загрузить шаблон<input style="display:none" type="file" name="docFile" @change="handleFileSelect"></label>
-			</form>
+			<upload-template></upload-template>
 		</div>
 
 		<template-grid
