@@ -21,7 +21,7 @@
 				<at-input v-model="year" size="small"></at-input>
 			</div>
 			<div class="spacer"></div>
-			<upload-template></upload-template>
+			<upload-template v-on:uploaded="getData(true)"></upload-template>
 		</div>
 		<table style="width: calc(100% - 24px); margin: 12px; box-sizing: border-box;">
 			<template v-for="(upload, type) in uploads">
@@ -110,7 +110,11 @@
 		computed: {
 		},
 		methods: {
-			getData() {
+			getData(delay) {
+				if (delay === true) {
+					setTimeout(this.getData, 100);
+					return;
+				}
 				if (!this.month || !this.year) {
 					this.month = (new Date).getMonth() || 12;
 					if (this.month == 12) {

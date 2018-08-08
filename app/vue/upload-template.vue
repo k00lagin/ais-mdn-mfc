@@ -13,7 +13,7 @@
 			},
 			uploadTemplate: function() {
 				let form = document.getElementById('uploadTemplate');
-				app.sendMultiformData('https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData', form);
+				app.sendMultiformData('https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData', form, this.$emit('uploaded'));
 			}
 		}
 	};

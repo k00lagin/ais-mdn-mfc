@@ -72,6 +72,9 @@
 					}
 					response.json().then(function(data) {
 						console.log(data);
+						if (callback != undefined) {
+							callback();
+						}
 						if (data.success) {
 							app.$Message.success({
 								message:'Успех!',
