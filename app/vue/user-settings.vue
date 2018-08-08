@@ -1,10 +1,10 @@
 <template>
-	<div>
-		<div v-for="field in userSettings">
+	<div style="padding: 12px 24px;">
+		<div v-for="field in userSettings" style="margin-bottom: 8px">
 			<template :for="field.field">
 				<label v-if="field.field == 'fio'">
 					{{ field.label }}
-					<input v-if="isEditFio" v-model.trim="fio" type="text" style="width: 40ex;">
+					<input class="fio" v-if="isEditFio" v-model.trim="fio" type="text">
 					<span v-else>{{ ' ' + currentUser[field.field] }}</span>
 					<at-button v-if="!isEditFio" @click="isEditFio=true" icon="icon-edit" circle size="smaller"></at-button>
 					<at-button v-if="isEditFio" @click="saveNewFio" icon="icon-save" circle size="smaller"></at-button>
@@ -137,5 +137,16 @@
 </script>
 
 <style>
-	
+	.fio {
+		width: 40ex;
+		height:1em;
+		border: 0;
+		box-shadow: white 0px 3px, grey 0px 4px;
+		transition: box-shadow 400ms;
+	}
+	.fio:hover,
+	.fio:focus {
+		outline: none;
+		box-shadow: white 0px 3px, #79A1EB 0px 4px;
+	}
 </style>
