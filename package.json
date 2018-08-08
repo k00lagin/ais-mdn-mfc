@@ -6,7 +6,7 @@
   "keywords": [ "monitoring" ],
   "window": {
     "title": "Мониторинг развития сети МФЦ",
-    "icon": "icon.png",
+    "icon": "app/images/icon.png",
     "toolbar": true,
     "frame": true,
     "width": 800,
