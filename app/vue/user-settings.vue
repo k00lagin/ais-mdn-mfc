@@ -17,7 +17,7 @@
 		</div>
 		<div v-if="isEditPassword">
 			<label style="position: relative; display: inline-block;">
-				<input id="userPassword" v-model="password" :type="isPasswordMasked?'password':'text'">
+				<input id="userPassword" class="at-input__original" v-model="password" :type="isPasswordMasked?'password':'text'">
 				<i @mousedown.left="unmaskPassword" @mouseup="maskPassword" @mouseout="maskPassword" :class="isPasswordMasked?'icon icon-eye-off':'icon icon-eye'" style="transform: translateY(-50%); position: absolute; right: 6px; top: 50%;"></i>
 			</label>
 			<at-button @click="saveNewPassword" icon="icon-save" circle size="small"></at-button>
@@ -148,5 +148,9 @@
 	.fio:focus {
 		outline: none;
 		box-shadow: white 0px 3px, #79A1EB 0px 4px;
+	}
+	#userPassword {
+		height: 28px;
+		font-size: 11px;
 	}
 </style>
