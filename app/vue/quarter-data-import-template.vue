@@ -115,6 +115,22 @@
 					setTimeout(this.getData, 100);
 					return;
 				}
+				if (this.mouType == 'urm') {
+					this.uploads = {
+						federal: null,
+						otherServices: null,
+						windowsAndEmployee: null
+					};
+				}
+				else {
+					this.uploads = {
+						federal: null,
+						regional: null,
+						municipal: null,
+						otherServices: null,
+						windowsAndEmployee: null
+					};
+				}
 				if (!this.month || !this.year) {
 					this.month = (new Date).getMonth() || 12;
 					if (this.month == 12) {
