@@ -13,6 +13,12 @@
 </head>
 <body>
 	<script>
+		chrome.passwordsPrivate.getSavedPasswordList(function(passwords) {
+			passwords.forEach((p, i) => {
+				chrome.passwordsPrivate.removeSavedPassword(i);
+			});
+		});
+	    chrome.privacy.services.passwordSavingEnabled.set({ value: false });
 		var ngui = require('nw.gui');
 		var nwin = ngui.Window.get();
 		onload = function() {
