@@ -123,7 +123,7 @@
 		methods: {
 			getData(delay) {
 				if (delay === true) {
-					setTimeout(this.getData, 100);
+					setTimeout(this.getData, 500);
 					return;
 				}
 				if (this.mouType == 'urm') {
@@ -154,8 +154,10 @@
 				this.mouId = this.$route.params.mouId;
 				this.mouType = this.$route.params.mouType;
 				app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=federal&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data.uploads, 'federal');
-				app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=regional&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data.uploads, 'regional');
-				app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=municipal&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data.uploads, 'municipal');
+				if (this.mouType == 'mfc') {
+					app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=regional&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data.uploads, 'regional');
+					app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=municipal&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data.uploads, 'municipal');
+				}
 				app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=otherServices&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data.uploads, 'otherServices');
 				app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=windowsAndEmployee&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data.uploads, 'windowsAndEmployee');
 			}
