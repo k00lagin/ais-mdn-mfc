@@ -44,11 +44,22 @@
 							<td>{{ item.template.userId }}</td>
 							<td>{{ item.uploadFile.createDate | datetime }}</td>
 							<td>{{ item.uploadFile.userId }}</td>
-							<td>
-								<a :href="'https://моидокументы.рф/mfc/ws/file/view/' + item.uploadFile.fileId">{{ item.uploadFile.fileName }}</a>
-								<at-badge v-if="item.uploadFile.countErrors" :value="item.uploadFile.countErrors"></at-badge>
-								<at-badge v-else status="success" value="✓"></at-badge>
-							</td>
+							<td style="overflow:visible">
+								<template v-if="item.uploadFile && item.uploadFile.countErrors">
+									<at-popover placement="left">
+											<a :href="'https://моидокументы.рф/mfc/ws/file/view/' + item.uploadFile.fileId">{{ item.uploadFile.fileName }}</a>
+											<at-badge class="error_badge" :value="item.uploadFile.countErrors"></at-badge>
+											<template slot="content">
+												<p v-for="error in item.uploadFile.errors">{{ error }}</p>
+											</template>
+									</at-popover>									
+								</template>
+								<template v-else>
+									<a :href="'https://моидокументы.рф/mfc/ws/file/view/' + item.uploadFile.fileId">{{ item.uploadFile.fileName }}</a>
+									<at-badge  class="success_badge" status="success" value="✓"></at-badge>									
+								</template>
+							</td>							
+
 						</tr>
 					</template>
 				</tbody>
@@ -151,3 +162,12 @@
 		}
 	};	
 </script>
+<style>
+.success_badge,
+.error_badge {
+	cursor: default;
+}
+.error_badge:hover {
+	opacity: .80;
+}
+</style>
