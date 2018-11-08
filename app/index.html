@@ -40,7 +40,7 @@
 					}
 					response.json().then(function (data) {
 						object[paramName] = data;
-					});							
+					});
 				})
 				.catch((error) => {
 					throw new Error(error);
@@ -99,46 +99,6 @@
 			}
 		  }
 		}
-Vue.component('schedule', {
-	template: '#schedule',
-	props: {
-		schedule: Object
-	},
-	data: function () {
-    return {
-		week: [
-			{
-				label: 'Понедельник:',
-				shortName: 'mo'
-			},
-			{
-				label: 'Вторник:',
-				shortName: 'tu'
-			},
-			{
-				label: 'Среда:',
-				shortName: 'we'
-			},
-			{
-				label: 'Четверг:',
-				shortName: 'th'
-			},
-			{
-				label: 'Пятница:',
-				shortName: 'fr'
-			},
-			{
-				label: 'Суббота:',
-				shortName: 'sa'
-			},
-			{
-				label: 'Воскресенье:',
-				shortName: 'su'
-			}
-		]
-    }
-  }
-});
 var templateGrid = Vue.component('template-grid', {
 	template: '#template-grid-template',
 	mixins: [commonMethods],
@@ -309,7 +269,7 @@ var templateView = Vue.component('template-view', {
 		}
 		else {
 			this.year = (new Date).getFullYear();
-		}		
+		}
 	},
 	created: function() {
 		if (!app.mfcList) {
@@ -379,28 +339,16 @@ var commonDataView = Vue.component('common_data-view', {
 		</div>
 	</div>
 </script>
-<script type="text/x-template" id="schedule">
-	<div>
-		<template v-for="day in week">
-			<span>{{ day.label }}</span>
-			<input type="checkbox" :checked="schedule[day.shortName + '_weekend']"><label for="">выходной</label>
-			<label for="">с</label><input type="time" :value="schedule[day.shortName + '_from']"><label for="">до</label><input type="time" :value="schedule[day.shortName + '_to']">
-			<input type="checkbox" :checked="schedule[day.shortName + '_no_breakfast']"><label for="">без перерыва</label>
-			<label for="">с</label><input type="time" :value="schedule[day.shortName + '_breakfast_from']"><label for="">до</label><input type="time" :value="schedule[day.shortName + '_breakfast_to']">
-			<br>
-		</template>
-	</div>
-</script>
 <script type="text/x-template" id="template-grid-template">
   <table :class="{ 'favorite-only' : isFavoriteOnly }">
     <thead>
       <tr>
         <th v-for="(key, index) in columns"
-          @click="!key.noSort ? sortBy(key.field) : ''"
-          :class="'column__' + key.field + ' ' + { active: sortKey == key.field }">
-          {{ key.label }}
-          <span v-if="!key.noSort && sortKey == key.field" class="arrow" :class="sortOrders[key.field] > 0 ? 'asc' : 'dsc'">
-          </span>
+        	@click="!key.noSort ? sortBy(key.field) : ''"
+        	:class="'column__' + key.field + ' ' + { active: sortKey == key.field }">
+        	{{ key.label }}
+        	<span v-if="!key.noSort && sortKey == key.field" class="arrow" :class="sortOrders[key.field] > 0 ? 'asc' : 'dsc'">
+        	</span>
         </th>
       </tr>
     </thead>
@@ -436,7 +384,7 @@ var commonDataView = Vue.component('common_data-view', {
 			</template>
 			<span v-else="">
 				{{ entry[key.field] }}
-			</span>          
+			</span>
 		</td>
       </tr>
     </tbody>
@@ -558,6 +506,7 @@ var commonDataView = Vue.component('common_data-view', {
 			{ path: '/urm_common_data', component: commonDataView, props: {list: 'urmList', columns: 'commonDataColumns'} },
 			{ path: '/user_settings', component: httpVueLoader('vue/user-settings.vue') },
 			{ path:  '/quarter_data_import/:mouType/:mouId', component: httpVueLoader('vue/quarter-data-import-template.vue') },
+			{ path:  '/common_data/:mouType/:mouId', component: httpVueLoader('vue/common-data.vue') },
 		];
 		const router = new VueRouter({
 			routes
@@ -591,187 +540,6 @@ var commonDataView = Vue.component('common_data-view', {
 	      		dictionarySubjectName: null,
 			  	searchQuery: '',
 
-			  cardFields: [
-					{
-						label: 'Полное наименование',
-						field: 'full_name'
-					},
-					{
-						label: 'Организационно-правовая форма',
-						field: 'business_form',
-						type: 'select',
-						options: [
-							{
-								value: 'Государственное бюджетное учреждение'
-							},
-							{
-								value: 'Государственное казенное учреждение'
-							},
-							{
-								value: 'Государственное автономное учреждение'
-							},
-							{
-								value: 'Муниципальное бюджетное учреждение'
-							},
-							{
-								value: 'Муниципальное казенное учреждение'
-							},
-							{
-								value: 'Муниципальное автономное учреждение'
-							}
-						]
-					},
-					{
-						label: 'ИНН',
-						field: 'inn'
-					},
-					{
-						label: 'ОГРН',
-						field: 'mfc_ogrn'
-					},
-					{
-						label: 'Статус',
-						field: 'status',
-						type: 'select',
-						options: [
-							{
-								value: 'действующий'
-							},
-							{
-								value: 'ликвидированный'
-							}
-						]
-					},
-					{
-						label: 'Дата начала предоставления услуг',
-						type: 'date',
-						field: 'start_date'
-					},
-					{
-						type: 'number',
-						label: 'Количество окон',
-						field: 'wnd_count'
-					},
-					{
-						type: 'number',
-						label: 'Количество окон, в которых работают универсальные специалисты',
-						field: 'universal_wnd_count'
-					},
-					{
-						label: 'Тип создания',
-						field: 'create_type',
-						type: 'select',
-						options: [
-							{
-								value: 'безвозмездное пользование'
-							},
-							{
-								value: 'строительство'
-							},
-							{
-								value: 'ремонт'
-							},
-							{
-								value: 'аренда'
-							},
-							{
-								value: 'приобретение помещения'
-							}
-						]
-					},
-					{
-						label: 'Правовой статус',
-						field: 'legal_status'
-					},
-					{
-						label: 'Учредитель',
-						field: 'mfc_founder'
-					},
-					{
-						type: 'subheading',
-						label: 'Руководитель'
-					},
-					{
-						label: 'Ф.И.О.',
-						field: 'head_full_name'
-					},
-					{
-						label: 'Должность',
-						field: 'head_position'
-					},
-					{
-						label: 'Телефон',
-						field: 'head_phone'
-					},
-					{
-						label: 'Адрес электронной почты',
-						field: 'head_email'
-					},
-					{
-						type: 'subheading',
-						label: 'Адрес'
-					},
-					{
-						label: 'Полный адрес',
-						field: 'address'
-					},
-					{
-						label: 'Субъект РФ',
-						field: 'rf_subject'
-					},
-					{
-						label: 'Широта',
-						field: 'coordinates.latitude'
-					},
-					{
-						label: 'Долгота',
-						field: 'coordinates.longitude'
-					},
-					{
-						type: 'subheading',
-						label: 'Режим работы'
-					},
-					{
-						type: 'schedule',
-						field: 'schedule'
-					},
-					{
-						type: 'subheading',
-						label: 'Контакты'
-					},
-					{
-						label: 'Интернет-сайт',
-						field: 'site'
-					},
-					{
-						label: 'Телефон',
-						field: 'phone'
-					},
-					{
-						label: 'Адрес электронной почты',
-						field: 'email'
-					},
-					{
-						type: 'subheading',
-						label: 'Контактное лицо'
-					},
-					{
-						label: 'Ф.И.О. контактного лица',
-						field: 'contact_person_full_name'
-					},
-					{
-						label: 'Должность',
-						field: 'contact_person_position'
-					},
-					{
-						label: 'Телефон',
-						field: 'contact_person_phone'
-					},
-					{
-						label: 'Адрес электронной почты',
-						field: 'contact_person_email'
-					}
-			  ],
 				commonDataColumns: [
 					{
 						label: 'Полное наименование',
@@ -837,7 +605,7 @@ var commonDataView = Vue.component('common_data-view', {
 			computed: {
 				// build https://api.github.com/repos/k00lagin/ais-mdn-mfc/commits
 				version: function() {
-					return(nw.App.manifest.version)
+					return(nw.App.manifest.version);
 				},
 				favoriteList: {
 					get: function() {
@@ -852,9 +620,6 @@ var commonDataView = Vue.component('common_data-view', {
 				this.isFavoriteOnly = localStorage.getItem( 'isFavoriteOnly' ) == 'true';
 			},
 			watch: {
-
-			},
-			components: {
 
 			},
 			methods: {
