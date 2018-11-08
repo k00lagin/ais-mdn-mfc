@@ -27,10 +27,10 @@
 				<mfc-comfort :mou-type="mouType" :mou-id="mouId" :card-data="cardData"></mfc-comfort>
 			</at-tab-pane>
 			<at-tab-pane label="IT-инфраструктура МФЦ" name="name4">
-				<p>Content of Tab Pane 3</p>
+				<p>Тут будет про IT-инфраструктуру</p>
 			</at-tab-pane>
 			<at-tab-pane label="Бренд МФЦ" name="name5">
-				<p>Content of Tab Pane 3</p>
+				<p>Тут будет про Бренд</p>
 			</at-tab-pane>
 		</at-tabs>
 	</div>	
