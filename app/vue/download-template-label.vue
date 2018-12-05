@@ -24,7 +24,7 @@
 			getData: function () {
 				this.uploads = null;
 				if (typeof(this.year) == "number" && typeof(this.month) == "number") {
-					app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=otherServices&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data, "uploads");
+					app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType='+this.templateType+'&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data, "uploads");
 				}				
 			}
 		},
