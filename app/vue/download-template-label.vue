@@ -1,6 +1,6 @@
 <template v-if="uploads">
 		<div class="success" v-if="errors == 0"></div>
-		<div  class="error" v-else-if="errors > 0"></div>
+		<div class="error" v-else-if="errors > 0"></div>
 		<div v-else></div>
 </template>
 
@@ -51,13 +51,13 @@
 </script>
 <style>
 	.success {
-		width:100%;
-		height:2px;
-		background:green;
+		width: 100%;
+		height: 2px;
+		background: #13ce66;
 	}
 	.error {
-		width:100%;
-		height:2px;
-		background:red;
+		width: 100%;
+		height: 2px;
+		background: #ff4949;
 	}
 </style>
