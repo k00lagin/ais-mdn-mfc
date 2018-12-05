@@ -77,10 +77,6 @@
 						throw new Error('Network response was not ok');
 					}
 					response.json().then(function(data) {
-						console.log(data);
-						if (callback != undefined) {
-							callback();
-						}
 						if (data.success) {
 							app.$Message.success({
 								message:'Успех!',
@@ -92,7 +88,9 @@
 								message:data.data[0],
 								duration: 9000
 							});
-
+						}
+						if (callback != undefined) {
+							callback();
 						}
 					});
 				});
