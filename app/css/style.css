@@ -233,18 +233,6 @@ td {
 	width: 4em;
 }
 
-.templateDownloadLabel {
-	cursor: pointer;
-	padding-left: 3px;
-	padding-right: 3px;
-	text-align: center;
-	width: 18px;
-}
-
-.templateDownloadLabel:hover {
-	background: rgba(0, 0, 0, .1);
-}
-
 /* AT */
 
 .at-menu {

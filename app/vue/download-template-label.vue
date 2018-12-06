@@ -1,7 +1,6 @@
-<template v-if="uploads">
-		<div class="success" v-if="errors == 0"></div>
-		<div class="error" v-else-if="errors > 0"></div>
-		<div v-else></div>
+<template>
+	<at-tag class="downloadTemplateLabel" v-if="errors == null">{{ templateTypeLocale[templateType] }}</at-tag>
+	<at-tag class="downloadTemplateLabel hasData" v-else :color="errors > 0?'error':'success'">{{ templateTypeLocale[templateType] }}</at-tag>	
 </template>
 
 <script>
@@ -17,11 +16,19 @@
 		data: function() {
 			return {
 				uploads: null,
-				errors: null
+				errors: null,
+				templateTypeLocale: {
+					"federal": "Ф",
+					"municipal": "М",
+					"regional": "Р",
+					"otherServices": "И",
+					"windowsAndEmployee": "О"
+				}
 			}
 		},
 		methods: {
 			getData: function () {
+				this.errors = null;
 				this.uploads = null;
 				if (typeof(this.year) == "number" && typeof(this.month) == "number") {
 					app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType='+this.templateType+'&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data, "uploads");
@@ -50,14 +57,13 @@
 	};
 </script>
 <style>
-	.success {
-		width: 100%;
-		height: 2px;
-		background: #13ce66;
+	.downloadTemplateLabel {
+		cursor: pointer;
 	}
-	.error {
-		width: 100%;
-		height: 2px;
-		background: #ff4949;
+	.downloadTemplateLabel:hover {
+		background-image: linear-gradient(rgba(0, 0, 0, .1),rgba(0, 0, 0, .1));
+	}
+	.downloadTemplateLabel.hasData:hover {
+		background-image: linear-gradient(rgba(255, 255, 255, .1),rgba(255, 255, 255, .2));
 	}
 </style>
