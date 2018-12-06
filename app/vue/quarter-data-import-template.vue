@@ -142,14 +142,11 @@
 						windowsAndEmployee: null
 					};
 				}
-				if (!this.month || !this.year) {
-					this.month = (new Date).getMonth() || 12;
-					if (this.month == 12) {
-						this.year = (new Date).getFullYear() - 1
-					}
-					else {
-						this.year = (new Date).getFullYear();
-					}						
+				if (!this.month) {
+					this.month = Number(this.$route.params.month);
+				}
+				if (!this.year) {
+					this.year = Number(this.$route.params.year);
 				}
 				this.mouId = this.$route.params.mouId;
 				this.mouType = this.$route.params.mouType;

@@ -397,7 +397,7 @@ var commonDataView = Vue.component('common_data-view', {
 				{{ entry[key.field].split(',').slice(entry[key.field].split(',').length-2).join(',') }}
 			</template>
 			<template v-else-if="key.field == 'full_name'">
-				<router-link v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'" :to="'/quarter_data_import/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry[key.field] }}</router-link>
+				<router-link v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'" :to="'/quarter_data_import/' + entry.mouType + '/' + entry.id + '/' + year + '/' + month" class="textBtn">{{ entry[key.field] }}</router-link>
 				<router-link v-if="$route.path == '/mfc_common_data' || $route.path == '/urm_common_data'" :to="'/common_data/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry[key.field] }}</router-link>
 			</template>
 			<template v-else-if="key.field == 'start_date'">
@@ -526,7 +526,7 @@ var commonDataView = Vue.component('common_data-view', {
 			{ path: '/mfc_common_data', component: commonDataView, props: {list: 'mfcList', columns: 'commonDataColumns'} },
 			{ path: '/urm_common_data', component: commonDataView, props: {list: 'urmList', columns: 'commonDataColumns'} },
 			{ path: '/user_settings', component: httpVueLoader('vue/user-settings.vue') },
-			{ path:  '/quarter_data_import/:mouType/:mouId', component: httpVueLoader('vue/quarter-data-import-template.vue') },
+			{ path:  '/quarter_data_import/:mouType/:mouId/:year/:month', component: httpVueLoader('vue/quarter-data-import-template.vue') },
 			{ path:  '/common_data/:mouType/:mouId', component: httpVueLoader('vue/common-data.vue') },
 		];
 		const router = new VueRouter({
