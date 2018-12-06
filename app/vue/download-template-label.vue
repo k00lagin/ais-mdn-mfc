@@ -39,6 +39,9 @@
 			this.getData();
 		},
 		watch: {
+			'$route' (to, from) {
+				this.getData();
+			},
 			month: function() {
 				this.getData();
 			},
