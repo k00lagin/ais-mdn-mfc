@@ -10,6 +10,7 @@
 	<script src="js/at.min.js"></script>
 	<script src="js/httpVueLoader.js"></script>
 	<script src="js/vue2-filters.min.js"></script>
+	<script src="js/xlsx.full.min.js"></script>
 </head>
 <body>
 	<script>
@@ -207,6 +208,7 @@ var templateGrid = Vue.component('template-grid', {
 	},
 	components: {
 		'download-template-label': httpVueLoader('vue/download-template-label.vue'),
+		'fill-templates': httpVueLoader('vue/fill-templates.vue'),
 	}
 })
 var templateView = Vue.component('template-view', {
@@ -504,6 +506,7 @@ var commonDataView = Vue.component('common_data-view', {
 					<at-menu-item-group title="Шаблоны">
 						<at-menu-item to="/mfc_template_list">МФЦ</at-menu-item>
 						<at-menu-item to="/urm_template_list">ТОСП</at-menu-item>
+						<at-menu-item to="/fill_templates">Заполнение</at-menu-item>
 					</at-menu-item-group>
 					<at-menu-item-group title="Подсистемы сбора информации">
 							<at-menu-item to="/mfc_common_data">МФЦ</at-menu-item>
@@ -519,6 +522,7 @@ var commonDataView = Vue.component('common_data-view', {
 		const routes = [
 			{ path: '/mfc_template_list', component: templateView, props: {list: 'mfcList', columns: 'templateListColumns'} },
 			{ path: '/urm_template_list', component: templateView, props: {list: 'urmList', columns: 'templateListColumns'} },
+			{ path: '/fill_templates', component: httpVueLoader('vue/fill-templates.vue') },
 			{ path: '/mfc_common_data', component: commonDataView, props: {list: 'mfcList', columns: 'commonDataColumns'} },
 			{ path: '/urm_common_data', component: commonDataView, props: {list: 'urmList', columns: 'commonDataColumns'} },
 			{ path: '/user_settings', component: httpVueLoader('vue/user-settings.vue') },
