@@ -196,6 +196,27 @@
             saveCortegeList: function () {
                 localStorage.cortegeList = JSON.stringify(this.cortegeList);
             },
+            addCortegeToList: function () {
+                let cortege = {
+                    title: "",
+                    value: [
+                        this.d[1],
+                        this.d[2],
+                        this.d[3],
+
+                        this.d[6],
+                        this.d[7],
+                        this.d[8],
+                        this.d[9],
+
+                        this.d[11],
+                        this.d[12],
+                        this.d[13]
+                    ]
+                };
+                console.log(cortege);
+                this.cortegeList.push(cortege);
+            },
             fill: function (e) {
                 var cortegeValue = JSON.parse(e.currentTarget.value);
                 
