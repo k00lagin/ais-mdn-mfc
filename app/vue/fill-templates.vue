@@ -105,7 +105,7 @@
                 workbook: null,
                 sheet: null,
                 d: [],
-                cortegeList: null,
+                cortegeList: [],
             };
         },
         props: {
@@ -215,10 +215,12 @@
             remove: function (e) {
                 var index = e.currentTarget.value;
                 Vue.delete(this.cortegeList, index);
-                this.saveCortegeList();
             },
         },
         watch: {
+            'cortegeList': function () {
+                this.saveCortegeList();
+            },
             'd.1': function (){
                 this.d[0] = this.recalculate(0);
             },
