@@ -2,7 +2,7 @@
   "main": "app/index.html",
   "name": "mrsmfc",
   "description": "monitoring",
-  "version": "0.8.1",
+  "version": "0.9.1",
   "keywords": [ "monitoring" ],
   "window": {
     "title": "Мониторинг развития сети МФЦ",
