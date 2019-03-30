@@ -17,6 +17,10 @@
         </div>
         <div v-if="sheet">
         <table style="max-width: 860px;">
+            <tr>
+                <th><em>{{ sheet.D3.v }}</em></th>
+                <th></th>
+            </tr>
             <tbody>
             <tr>
                 <td style="font-weight:700">{{ sheet.C5.v }}</td>
