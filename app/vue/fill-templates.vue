@@ -15,7 +15,7 @@
             </at-card>
         </div>
         <div v-if="sheet">
-        <table>
+        <table style="max-width: 860px;">
             <tbody>
             <tr>
                 <td style="font-weight:700">{{ sheet.C5.v }}</td>
@@ -23,8 +23,8 @@
             </tr>
             <tr></tr>
             <tr>
-                <td>{{ sheet.C6.v }}</td>
-                <td>{{ d[0] }}</td>
+                <td><em>{{ sheet.C6.v }}</em></td>
+                <td><em>{{ d[0] }}</em></td>
             </tr>
             <tr>
                 <td>{{ sheet.C7.v }}</td>
@@ -43,12 +43,12 @@
                 <td></td>
             </tr>
             <tr>
-                <td>{{ sheet.C12.v }}</td>
-                <td>{{ d[4] }}</td>
+                <td><em>{{ sheet.C12.v }}</em></td>
+                <td><em>{{ d[4] }}</em></td>
             </tr>
             <tr>
-                <td>{{ sheet.C13.v }}</td>
-                <td>{{ d[5] }}</td>
+                <td><em>{{ sheet.C13.v }}</em></td>
+                <td><em>{{ d[5] }}</em></td>
             </tr>
             <tr>
                 <td>{{ sheet.C14.v }}</td>
@@ -72,7 +72,7 @@
             </tr>
             <tr>
                 <td>{{ sheet.C19.v }}</td>
-                <td>{{ d[10] }}</td>
+                <td><em>{{ d[10] }}</em></td>
             </tr>
             <tr>
                 <td>{{ sheet.C20.v }}</td>
