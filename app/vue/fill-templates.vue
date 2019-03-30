@@ -1,18 +1,19 @@
 <template>
     <div>
         <input v-if="!sheet" type="file" @change="handleFileChange">
-        <div v-if="sheet && cortegeList.length > 0">
-            <at-card style="width:300px; display:inline-block; margin-right:8px;margin-bottom:4px;" v-for="(cortege, index) in cortegeList" :key="index">
-                <span slot="title" v-if="cortege.title">{{ cortege.title }}</span>
-                <at-button-group slot="extra" size="small">
-                    <at-button icon="icon-edit" hollow></at-button>
-                    <at-button icon="icon-star" click="fave" hollow></at-button>
-                    <at-button icon="icon-trash-2" type="error" @click="remove" hollow :value="index"></at-button>
+        <div v-if="sheet && cortegeList.length > 0" style="display:flex;flex-flow:row wrap;">
+            <template v-for="(cortege, index) in cortegeList">
+                <at-button-group size="small" :key="index" style="display: flex;">
+                    <at-button type="primary" @click="fill" :value="JSON.stringify(cortege.value)" icon="icon-arrow-down" :title="cortege.value.join(' ')"></at-button>
+                    <at-button icon="icon-edit" style="position:relative;curso">
+                        <label :for="'cortegeTitle-'+index" style="width:100%;height:100%;display:block;position:absolute;left:0;top:0;cursor: text;" :title="cortege.value.join(' ')"></label>
+                        <input :id="'cortegeTitle-'+index" type="text" v-model="cortegeList[index].title" @change="saveCortegeList" :placeholder="cortege.value.join(' ')" style="border-color: transparent;background-color: transparent;">
+                    </at-button>
+                    <at-button icon="icon-trash-2" type="error" @click="remove" :value="index"></at-button>
                 </at-button-group>
-                <at-button @click="fill" :value="JSON.stringify(cortege.value)">
-                    {{ cortege.value.join(" ") }}
-                </at-button>
-            </at-card>
+                <div style="width:3em;flex-shrink:1;"></div>
+            </template>
+            <at-button type="primary" size="small" @click="addCortegeToList" icon="icon-arrow-up" title="Сохранить данные на будущее"></at-button>
         </div>
         <div v-if="sheet">
         <table style="max-width: 860px;">
