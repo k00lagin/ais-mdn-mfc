@@ -1,6 +1,9 @@
 <template>
     <div>
-        <input v-if="!sheet" type="file" @change="handleFileChange">
+        <form v-show="!sheet" @submit.prevent="uploadTemplate" id="uploadTemplate" method="post" action="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData" enctype="multipart/form-data" target="_blank">
+            <input id="uploadFilename" name="filename" type="hidden">
+            <input @change="handleFileChange" name="docFile" type="file">
+        </form>
         <div v-if="sheet && cortegeList.length > 0" style="display:flex;flex-flow:row wrap;">
             <template v-for="(cortege, index) in cortegeList">
                 <at-button-group size="small" :key="index" style="display: flex;">
@@ -98,6 +101,7 @@
             </tbody>
         </table>
         <button type="button" @click="saveTemplate" :value="'Окна ' + sheet.D3.v" title="в папку с программой">Сохранить файл</button>
+        <button type="button" @click='uploadTemplate' :value="'Окна ' + sheet.D3.v">Загрузить на сервер</button>
         </div>
     </div>
 </template>
@@ -107,6 +111,7 @@
         data: function() {
             return {
                 path: null,
+                filename: null,
                 workbook: null,
                 sheet: null,
                 d: [],
@@ -118,7 +123,8 @@
         },
         methods: {
             handleFileChange: function(e) {
-                this.path = e.target.files[0].name;
+                this.filename = e.target.files[0].name;
+                this.path = e.target.files[0].path;
                 var mod = this;
                 var reader = new FileReader();
                 reader.onload = function(e) {
@@ -127,6 +133,7 @@
                     mod.readFromUint8(data);
                 };
                 reader.readAsArrayBuffer(e.target.files[0]);
+                document.getElementById('uploadFilename').value=e.target.files[0].name;
             },
             readFromUint8: function (uint8) {
                 this.workbook = XLSX.read(uint8, {type: 'array'});
@@ -154,8 +161,8 @@
                 app.$data.windowsTemplateFillingmodalTitle = sheet.C2.v + " | " + sheet.D3.v;
             },
             saveTemplate: function (e) {
-                var filename = this.path;
-                console.log(this.sheet);
+                var path = this.path;
+                var filename = this.filename;
                 this.sheet.D7 = this.cellValue(this.sheet.D7, this.d[1]);
                 this.sheet.D8 = this.cellValue(this.sheet.D8, this.d[2]);
                 this.sheet.D9 = this.cellValue(this.sheet.D9, this.d[3]);
@@ -174,7 +181,12 @@
                 this.sheet.D13 = this.cellValue(this.sheet.D13, this.d[5]);
                 this.sheet.D19 = this.cellValue(this.sheet.D19, this.d[10]);
                 var wbout = XLSX.write(this.workbook, {type:'buffer', bookType:"xlsx"});
-                fs.writeFile(filename, wbout, function(err) {});
+                fs.writeFile(path, wbout, function(err) {});
+            },
+            uploadTemplate: function (e) {
+                this.saveTemplate();
+                var form = document.getElementById("uploadTemplate");
+                app.sendMultiformData('https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData', form);
             },
             cellValue: function(cell, value) {
                 cell = cell || {};
