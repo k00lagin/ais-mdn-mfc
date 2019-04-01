@@ -103,7 +103,7 @@
             </tr>
             </tbody>
         </table>
-        <button type="button" @click="saveTemplate" :value="'Окна ' + sheet.D3.v" title="в папку с программой">Сохранить файл</button>
+        <button type="button" @click="saveTemplate" :value="'Окна ' + sheet.D3.v">Сохранить файл</button>
         <button type="button" @click='uploadTemplate' :value="'Окна ' + sheet.D3.v">Загрузить на сервер</button>
         </div>
     </div>
