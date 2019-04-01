@@ -18,6 +18,9 @@
             </template>
             <at-button type="primary" size="small" @click="addCortegeToList" icon="icon-arrow-up" title="Сохранить данные на будущее"></at-button>
         </div>
+        <div v-else>
+        	<at-button v-if="sheet && cortegeList.length === 0" type="primary" size="small" @click="addCortegeToList" icon="icon-arrow-up" title="Сохранить данные на будущее"></at-button>
+        </div>
         <div v-if="sheet">
         <table style="max-width: 860px;">
             <tr>
