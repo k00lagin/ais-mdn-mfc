@@ -163,9 +163,7 @@
 
                 app.$data.windowsTemplateFillingmodalTitle = sheet.C2.v + " | " + sheet.D3.v;
             },
-            saveTemplate: function (e) {
-                var path = this.path;
-                var filename = this.filename;
+            applyDataToSheet: function () {
                 this.sheet.D7 = this.cellValue(this.sheet.D7, this.d[1]);
                 this.sheet.D8 = this.cellValue(this.sheet.D8, this.d[2]);
                 this.sheet.D9 = this.cellValue(this.sheet.D9, this.d[3]);
@@ -183,11 +181,21 @@
                 this.sheet.D12 = this.cellValue(this.sheet.D12, this.d[4]);
                 this.sheet.D13 = this.cellValue(this.sheet.D13, this.d[5]);
                 this.sheet.D19 = this.cellValue(this.sheet.D19, this.d[10]);
+            },
+            saveTemplate: function (e) {
+                var path = this.path;
+                this.applyDataToSheet();
                 var wbout = XLSX.write(this.workbook, {type:'buffer', bookType:"xlsx"});
-                fs.writeFile(path, wbout, function(err) {});
+                fs.writeFile(path, wbout, function(err){
+                    console.log(err);
+                });
             },
             uploadTemplate: function (e) {
-                this.saveTemplate();
+                var path = this.path;
+                this.applyDataToSheet();
+                var wbout = XLSX.write(this.workbook, {type:'buffer', bookType:"xlsx"});
+                fs.writeFileSync(path, wbout);
+                
                 var form = document.getElementById("uploadTemplate");
                 app.sendMultiformData('https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData', form);
             },
