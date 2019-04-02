@@ -22,89 +22,91 @@
         	<at-button v-if="sheet && cortegeList.length === 0" type="primary" size="small" @click="addCortegeToList" icon="icon-arrow-up" title="Сохранить данные на будущее"></at-button>
         </div>
         <div v-if="sheet">
-        <table style="max-width: 860px;">
-            <tr>
-                <th><em>{{ sheet.D3.v }}</em></th>
-                <th></th>
-            </tr>
-            <tbody>
-            <tr>
-                <td style="font-weight:700">{{ sheet.C5.v }}</td>
-                <td></td>
-            </tr>
-            <tr></tr>
-            <tr>
-                <td><em>{{ sheet.C6.v }}</em></td>
-                <td><em>{{ d[0] }}</em></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C7.v }}</td>
-                <td><input type="text" v-model.trim.number="d[1]"></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C8.v }}</td>
-                <td><input type="text" v-model.trim.number="d[2]"></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C9.v }}</td>
-                <td><input type="text" v-model.trim.number="d[3]"></td>
-            </tr>
-            <tr>
-                <td style="font-weight:700">{{ sheet.C11.v }}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><em>{{ sheet.C12.v }}</em></td>
-                <td><em>{{ d[4] }}</em></td>
-            </tr>
-            <tr>
-                <td><em>{{ sheet.C13.v }}</em></td>
-                <td><em>{{ d[5] }}</em></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C14.v }}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C15.v }}</td>
-                <td><input type="text" v-model.trim.number="d[6]"></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C16.v }}</td>
-                <td><input type="text" v-model.trim.number="d[7]"></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C17.v }}</td>
-                <td><input type="text" v-model.trim.number="d[8]"></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C18.v }}</td>
-                <td><input type="text" v-model.trim.number="d[9]"></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C19.v }}</td>
-                <td><em>{{ d[10] }}</em></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C20.v }}</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C21.v }}</td>
-                <td><input type="text" v-model.trim.number="d[11]"></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C22.v }}</td>
-                <td><input type="text" v-model.trim.number="d[12]"></td>
-            </tr>
-            <tr>
-                <td>{{ sheet.C23.v }}</td>
-                <td><input type="text" v-model.trim.number="d[13]"></td>
-            </tr>
-            </tbody>
-        </table>
-        <button type="button" @click="saveTemplate" :value="'Окна ' + sheet.D3.v">Сохранить файл</button>
-        <button type="button" @click='uploadTemplate' :value="'Окна ' + sheet.D3.v">Загрузить на сервер</button>
+            <table style="max-width: 860px;">
+                <tr>
+                    <th><em>{{ sheet.D3.v }}</em></th>
+                    <th></th>
+                </tr>
+                <tbody>
+                <tr>
+                    <td style="font-weight:700">{{ sheet.C5.v }}</td>
+                    <td></td>
+                </tr>
+                <tr></tr>
+                <tr>
+                    <td><em>{{ sheet.C6.v }}</em></td>
+                    <td><em>{{ d[0] }}</em></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C7.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[1]"></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C8.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[2]"></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C9.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[3]"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight:700">{{ sheet.C11.v }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><em>{{ sheet.C12.v }}</em></td>
+                    <td><em>{{ d[4] }}</em></td>
+                </tr>
+                <tr>
+                    <td><em>{{ sheet.C13.v }}</em></td>
+                    <td><em>{{ d[5] }}</em></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C14.v }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C15.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[6]"></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C16.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[7]"></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C17.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[8]"></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C18.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[9]"></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C19.v }}</td>
+                    <td><em>{{ d[10] }}</em></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C20.v }}</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C21.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[11]"></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C22.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[12]"></td>
+                </tr>
+                <tr>
+                    <td>{{ sheet.C23.v }}</td>
+                    <td><input class="at-input__original" type="text" v-model.trim.number="d[13]"></td>
+                </tr>
+                </tbody>
+            </table>
+            <div>
+                <at-button @click="saveTemplate">Сохранить файл</at-button>
+                <at-button @click="uploadTemplate">Загрузить на сервер</at-button>
+            </div>
         </div>
     </div>
 </template>
