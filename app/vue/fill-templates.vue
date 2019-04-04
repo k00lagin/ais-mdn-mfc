@@ -187,17 +187,13 @@
             saveTemplate: function (e) {
                 var path = this.path;
                 this.applyDataToSheet();
-                var wbout = XLSX.write(this.workbook, {type:'buffer', bookType:"xlsx"});
-                fs.writeFile(path, wbout, function(err){
-                    console.log(err);
-                });
+                XLSX.writeFile(this.workbook, path);
             },
             uploadTemplate: function (e) {
                 var path = this.path;
                 this.applyDataToSheet();
-                var wbout = XLSX.write(this.workbook, {type:'buffer', bookType:"xlsx"});
-                fs.writeFileSync(path, wbout);
-                
+                XLSX.writeFile(this.workbook, path);
+               
                 var form = document.getElementById("uploadTemplate");
                 app.sendMultiformData('https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData', form);
             },
