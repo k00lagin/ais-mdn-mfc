@@ -27,13 +27,22 @@
 		methods: {
 			showLoginWindow: function () {
 				let login = nw.Window.open(
-					"https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/esia/Login",
-					{},
-					win => {
-						console.log(win);
+					"app/blank.html",
+					{
+						width: 1024,
+						height: 768,
+					},
+					(win) => {
+						win.eval(null, `window.location.href = "http://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/esia/Login";`);
+						let checkAuth = setInterval(() => {
+							if (win.window.location.host === 'xn--d1achjhdicc8bh4h.xn--p1ai' && window.location.href !== 'http://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/esia/Login') {
+								win.close();
+								clearTimeout(checkAuth);
+								this.$emit('auth');
+							}
+						}, 100);
 					}
 				);
-				console.log(login);
 			},
 			handleLoginClick: function () {
 				if (rememberLogin) {
@@ -60,9 +69,9 @@
 						if (!response.ok) {
 							throw new Error("Network response was not ok");
 						}
-						//response.json().then(function(data) {
-						//  app.updateLogin();
-						// });
+						response.json().then(function(data) {
+							this.$emit('auth');
+						});
 					})
 					.catch(error => {
 						throw new Error(error);

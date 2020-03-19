@@ -506,7 +506,7 @@ var commonDataView = Vue.component('common_data-view', {
 			</div>
 			<router-view class="display" style="overflow-y: auto; overflow-x: hidden;"></router-view>
 		</div>
-		<login v-else></login>
+		<login v-else @auth="updateLogin"></login>
 	</div>
 	<script>
 		const routes = [
@@ -624,7 +624,7 @@ var commonDataView = Vue.component('common_data-view', {
 					},
 					set: function(newValue) {
 						localStorage.setItem( 'favoriteList', JSON.stringify(newValue) );
-					},				
+					},
 				},
 			},
 			mounted: function () {
