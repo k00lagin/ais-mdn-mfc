@@ -482,23 +482,11 @@ var commonDataView = Vue.component('common_data-view', {
 	</div>
 </script>
 	<div id="app">
-		<header>
+		<header v-if="currentUser">
 			<div class="spacer"></div>
-			<template v-if="currentUser">
+			<template>
 				<router-link to="/user_settings"  class="userfio textBtn">{{ currentUser.fio }}</router-link>
 				<a @click.prevent="logout" class="logout textBtn" href="https://моидокументы.рф/mfc/ws/auth/logout">Выход</a>
-			</template>
-			<template v-else>
-				<form action="https://моидокументы.рф/mfc/ws/auth/login" method="post" @submit.prevent="submitLogin">
-					<label for="username">Логин:</label>
-					<input id="username" type="text" name="username">
-					<label for="password">Пароль:</label>
-					<input id="password" type="password" name="password">
-					<input type="checkbox" id="rememberLogin">
-					<label for="rememberLogin">Запомнить меня</label>
-					<button type="submit">Ок</button>
-				</form>
-				<a style="margin-left: 16px;" href="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/esia/Login" target="_blank">Войти через ЕСИА</a>
 			</template>
 		</header>
 		<div v-if="currentUser" class="main">
@@ -518,6 +506,7 @@ var commonDataView = Vue.component('common_data-view', {
 			</div>
 			<router-view class="display" style="overflow-y: auto; overflow-x: hidden;"></router-view>
 		</div>
+		<login v-else></login>
 	</div>
 	<script>
 		const routes = [
@@ -839,6 +828,9 @@ var commonDataView = Vue.component('common_data-view', {
 				this.updateLogin();
 				this.getDictionarySubjectName();
 				updateInterval = window.setInterval('app.updateLogin()', 300000);
+			},
+			components: {
+				'login': httpVueLoader('vue/login.vue')
 			}
 		});
 	</script>
