@@ -1,0 +1,9 @@
+locales
+pnacl
+swiftshader
+*.exe
+*.nexe
+*.dll
+*.pak
+*.dat
+*.bin
