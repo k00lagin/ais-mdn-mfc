@@ -544,7 +544,7 @@ var commonDataView = Vue.component('common_data-view', {
 
 				commonDataColumns: [
 					{
-						label: 'Полное наименование',
+						label: 'Название',
 						field: 'full_name'
 					},
 					{
@@ -567,7 +567,7 @@ var commonDataView = Vue.component('common_data-view', {
 				],
 				templateListColumns: [
 					{
-						label: 'Полное наименование',
+						label: 'Название',
 						field: 'full_name'
 					},
 					{
@@ -724,7 +724,7 @@ var commonDataView = Vue.component('common_data-view', {
 										newUrmList[i].shortAddress = newUrmList[i].address.split(',').slice(2).join(',');
 									}
 									if (newUrmList[i].full_name.indexOf('Челябинская область ') === 0) {
-										newUrmList[i].shortName = newUrmList[i].full_name.substr(20);
+										newUrmList[i].shortName = newUrmList[i].full_name.substr(20).split(' муниципального района ').join(' района ');
 									}
 								});
 								app.urmList = newUrmList;
