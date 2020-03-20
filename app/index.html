@@ -252,9 +252,6 @@ var templateView = Vue.component('template-view', {
 		}
 	},
 	methods: {
-		handleIsFavoriteOnlyChange: function(e) {
-			localStorage.setItem( "isFavoriteOnly", e.currentTarget.value );
-		},
 		handleFileSelect: function(e) {
 			document.getElementById('uploadFilename').value=e.target.files[0].name;
 			this.uploadTemplate();
@@ -315,11 +312,6 @@ var commonDataView = Vue.component('common_data-view', {
 				app.isFavoriteOnly = newValue;
 			}
 		}
-	},
-	methods: {
-		handleIsFavoriteOnlyChange: function(e) {
-			localStorage.setItem( "isFavoriteOnly", e.currentTarget.value );
-		},
 	},
 	created: function() {
 		if (!app.mfcList) {
@@ -410,7 +402,7 @@ var commonDataView = Vue.component('common_data-view', {
 <script type="text/x-template" id="template-view">
 	<div>
 		<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-			<at-checkbox v-model="isFavoriteOnly" @on-change="handleIsFavoriteOnlyChange" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
+			<at-checkbox v-model="isFavoriteOnly" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
 			<div style="width: 200px; display: inline-block;"><at-input v-model="searchQuery" size="small">
 				<template slot="prepend">
 					<i class="icon icon-filter"></i>
@@ -454,7 +446,7 @@ var commonDataView = Vue.component('common_data-view', {
 <script type="text/x-template" id="common_data-view">
 	<div>
 		<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-			<at-checkbox v-model="isFavoriteOnly" @on-change="handleIsFavoriteOnlyChange" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
+			<at-checkbox v-model="isFavoriteOnly" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
 			<div style="width: 200px; display: inline-block;">
 				<at-input v-model="searchQuery" size="small">
 					<template slot="prepend">
