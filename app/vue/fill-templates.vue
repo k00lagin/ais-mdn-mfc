@@ -187,13 +187,19 @@
             saveTemplate: function (e) {
                 var path = this.path;
                 this.applyDataToSheet();
-                XLSX.writeFile(this.workbook, path);
+                let wbout = XLSX.write(this.workbook, {type:'buffer', bookType:"xlsx"});
+								fs.writeFile(path, wbout, function(err){
+									console.log(err);
+								});
             },
             uploadTemplate: function (e) {
                 var path = this.path;
                 this.applyDataToSheet();
-                XLSX.writeFile(this.workbook, path);
-               
+                var wbout = XLSX.write(this.workbook, {type:'buffer', bookType:"xlsx"});
+                fs.writeFileSync(path, wbout, function(err){
+									console.log(err);
+								});
+
                 var form = document.getElementById("uploadTemplate");
                 app.sendMultiformData('https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData', form);
             },
@@ -245,7 +251,7 @@
             },
             fill: function (e) {
                 var cortegeValue = JSON.parse(e.currentTarget.value);
-                
+
                 Vue.set(this.d, 1, cortegeValue[0]);
                 Vue.set(this.d, 2, cortegeValue[1]);
                 Vue.set(this.d, 3, cortegeValue[2]);

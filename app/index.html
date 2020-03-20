@@ -110,7 +110,6 @@ var templateGrid = Vue.component('template-grid', {
     isFavoriteOnly: Boolean,
     year: Number,
     month: Number,
-    templateType: Number,
     mouType: String
   },
   data: function () {
@@ -226,7 +225,6 @@ var templateView = Vue.component('template-view', {
 	data: function() {
 		return {
 			searchQuery: '',
-			templateType: 2,
 			month: null,
 			year: null,
 		}
@@ -363,29 +361,29 @@ var commonDataView = Vue.component('common_data-view', {
             <input type="checkbox" @change="handleFavoriteClick" :checked="favoriteList[entry.id] == true">
             <div></div>
           </label>
-          <div v-else-if="key.label == 'Шаблоны'" :style="($route.path == '/mfc_template_list')?'min-width: 110px;':''">
+          <div v-else-if="key.label == 'Шаблоны'" style="display:flex;">
 						<label tabindex="0" title="Федеральные услуги" class="templateDownloadLabel">
 							<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="federal"></download-template-label>
-							<input style="display: none;" type="file" :nwsaveas="'ФОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=federal&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+							<input style="display: none;" type="file" :nwsaveas="'ФОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=federal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
 						</label>
 						<template v-if="$route.path == '/mfc_template_list'">
 							<label tabindex="0" title="Региональные услуги" class="templateDownloadLabel">
 								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="regional"></download-template-label>
-								<input style="display: none;" type="file" :nwsaveas="'РОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=regional&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+								<input style="display: none;" type="file" :nwsaveas="'РОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=regional&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
 							</label>
 							<label tabindex="0" title="Муниципальные услуги" class="templateDownloadLabel">
 								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="municipal"></download-template-label>
-								<input style="display: none;" type="file" :nwsaveas="'МОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=municipal&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+								<input style="display: none;" type="file" :nwsaveas="'МОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=municipal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
 							</label>
 						</template>
 						<label tabindex="0" title="Услуги иных организаций" class="templateDownloadLabel">
 							<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="otherServices"></download-template-label>
-							<input style="display: none;" type="file" :nwsaveas="'Иные услуги ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=otherServices&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+							<input style="display: none;" type="file" :nwsaveas="'Иные услуги ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=otherServices&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
 						</label>
 
 						<label tabindex="0" title="Окна и сотрудники" class="templateDownloadLabel">
 							<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="windowsAndEmployee"></download-template-label>
-							<input style="display: none;" type="file" :nwsaveas="'Окна и сотрудники ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=windowsAndEmployee&mouType=' + mouType + '&subjectId=80&templateType=' + templateType + ''" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+							<input style="display: none;" type="file" :nwsaveas="'Окна и сотрудники ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=windowsAndEmployee&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
 						</label>
         	</div>
         	<template v-else-if="key.field == 'urban_area' || key.field == 'urban_district'">
@@ -437,12 +435,6 @@ var commonDataView = Vue.component('common_data-view', {
 			<div style="width: 80px; display: inline-block;">
 				<at-input v-model="year" size="small"></at-input>
 			</div>
-			<div style="width: 200px; display: inline-block;">
-				<at-select v-model="templateType" size="small">
-					<at-option :value="1">Полные</at-option>
-					<at-option :value="2">Сокращённые</at-option>
-				</at-select>
-			</div>
 			<div class="spacer"></div>
 			<upload-template></upload-template>
 		</div>
@@ -455,8 +447,7 @@ var commonDataView = Vue.component('common_data-view', {
 			:favorite-list="favoriteList"
 			:mou-type="$route.path == '/mfc_template_list' ? 'mfc' : 'urm'"
 			:year="year"
-			:month="month"
-			:template-type="templateType">
+			:month="month">
 		</template-grid>
 	</div>
 </script>
@@ -482,23 +473,11 @@ var commonDataView = Vue.component('common_data-view', {
 	</div>
 </script>
 	<div id="app">
-		<header>
+		<header v-if="currentUser">
 			<div class="spacer"></div>
-			<template v-if="currentUser">
+			<template>
 				<router-link to="/user_settings"  class="userfio textBtn">{{ currentUser.fio }}</router-link>
 				<a @click.prevent="logout" class="logout textBtn" href="https://моидокументы.рф/mfc/ws/auth/logout">Выход</a>
-			</template>
-			<template v-else>
-				<form action="https://моидокументы.рф/mfc/ws/auth/login" method="post" @submit.prevent="submitLogin">
-					<label for="username">Логин:</label>
-					<input id="username" type="text" name="username">
-					<label for="password">Пароль:</label>
-					<input id="password" type="password" name="password">
-					<input type="checkbox" id="rememberLogin">
-					<label for="rememberLogin">Запомнить меня</label>
-					<button type="submit">Ок</button>
-				</form>
-				<a style="margin-left: 16px;" href="https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/esia/Login" target="_blank">Войти через ЕСИА</a>
 			</template>
 		</header>
 		<div v-if="currentUser" class="main">
@@ -518,6 +497,7 @@ var commonDataView = Vue.component('common_data-view', {
 			</div>
 			<router-view class="display" style="overflow-y: auto; overflow-x: hidden;"></router-view>
 		</div>
+		<login v-else @auth="updateLogin"></login>
 	</div>
 	<script>
 		const routes = [
@@ -635,7 +615,7 @@ var commonDataView = Vue.component('common_data-view', {
 					},
 					set: function(newValue) {
 						localStorage.setItem( 'favoriteList', JSON.stringify(newValue) );
-					},				
+					},
 				},
 			},
 			mounted: function () {
@@ -839,6 +819,9 @@ var commonDataView = Vue.component('common_data-view', {
 				this.updateLogin();
 				this.getDictionarySubjectName();
 				updateInterval = window.setInterval('app.updateLogin()', 300000);
+			},
+			components: {
+				'login': httpVueLoader('vue/login.vue')
 			}
 		});
 	</script>
