@@ -7,7 +7,7 @@
 			</label>
 			<label>
 				Пароль:
-				<at-input v-model="password" placeholder=""></at-input>
+				<at-input v-model="password" placeholder="" type="password"></at-input>
 			</label>
 			<at-checkbox v-model="rememberLogin">Запомнить меня</at-checkbox>
 			<at-button type="primary" @click="handleLoginClick">Войти</at-button>
@@ -45,16 +45,16 @@
 				);
 			},
 			handleLoginClick: function () {
-				if (rememberLogin) {
-					localStorage.setItem("rememberLogin", rememberLogin);
-					localStorage.setItem("username", username);
-					localStorage.setItem("password", password);
+				if (this.rememberLogin) {
+					localStorage.setItem("rememberLogin", this.rememberLogin);
+					localStorage.setItem("username", this.username);
+					localStorage.setItem("password", this.password);
 				} else {
 					localStorage.removeItem("rememberLogin");
 					localStorage.removeItem("username");
 					localStorage.removeItem("password");
 				}
-				login();
+				this.login();
 			},
 			login: function () {
 				fetch("https://моидокументы.рф/mfc/ws/auth/login", {
@@ -63,14 +63,14 @@
 					headers: {
 						"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
 					},
-					body: "username=" + username + "&password=" + password
+					body: "username=" + this.username + "&password=" + this.password
 				})
 					.then(response => {
 						if (!response.ok) {
 							throw new Error("Network response was not ok");
 						}
 						response.json().then(function(data) {
-							this.$emit('auth');
+							app.updateLogin();
 						});
 					})
 					.catch(error => {
