@@ -361,7 +361,7 @@ var commonDataView = Vue.component('common_data-view', {
             <input type="checkbox" @change="handleFavoriteClick" :checked="favoriteList[entry.id] == true">
             <div></div>
           </label>
-          <div v-else-if="key.label == 'Шаблоны'" :style="($route.path == '/mfc_template_list')?'min-width: 110px;':''">
+          <div v-else-if="key.label == 'Шаблоны'" style="display:flex;">
 						<label tabindex="0" title="Федеральные услуги" class="templateDownloadLabel">
 							<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="federal"></download-template-label>
 							<input style="display: none;" type="file" :nwsaveas="'ФОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=federal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
