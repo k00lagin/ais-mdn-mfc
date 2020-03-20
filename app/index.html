@@ -389,12 +389,12 @@ var commonDataView = Vue.component('common_data-view', {
         	<template v-else-if="key.field == 'urban_area' || key.field == 'urban_district'">
         		{{ dictionarySubjectName[entry[key.field]] }}
         	</template>
-			<template v-else-if="key.field == 'address0'">
-				{{ entry[key.field].split(',').slice(entry[key.field].split(',').length-2).join(',') }}
+			<template v-else-if="key.field == 'address'">
+				{{ entry['shortAddress'] || entry['address'] }}
 			</template>
 			<template v-else-if="key.field == 'full_name'">
-				<router-link v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'" :to="'/quarter_data_import/' + entry.mouType + '/' + entry.id + '/' + year + '/' + month" class="textBtn">{{ entry[key.field] }}</router-link>
-				<router-link v-if="$route.path == '/mfc_common_data' || $route.path == '/urm_common_data'" :to="'/common_data/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry[key.field] }}</router-link>
+				<router-link v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'" :to="'/quarter_data_import/' + entry.mouType + '/' + entry.id + '/' + year + '/' + month" class="textBtn">{{ entry['shortName'] || entry[key.field] }}</router-link>
+				<router-link v-if="$route.path == '/mfc_common_data' || $route.path == '/urm_common_data'" :to="'/common_data/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry['shortName'] || entry[key.field] }}</router-link>
 			</template>
 			<template v-else-if="key.field == 'start_date'">
 				{{ entry[key.field] | date }}
@@ -720,6 +720,12 @@ var commonDataView = Vue.component('common_data-view', {
 									newUrmList[i].is_favorite = app.favoriteList && app.favoriteList[item._id] == true;
 									newUrmList[i].id = item._id;
 									newUrmList[i].mouType = 'urm';
+									if (newUrmList[i].address.split(',')[1] === ' обл. Челябинская') {
+										newUrmList[i].shortAddress = newUrmList[i].address.split(',').slice(2).join(',');
+									}
+									if (newUrmList[i].full_name.indexOf('Челябинская область ') === 0) {
+										newUrmList[i].shortName = newUrmList[i].full_name.substr(20);
+									}
 								});
 								app.urmList = newUrmList;
 							});
@@ -744,6 +750,9 @@ var commonDataView = Vue.component('common_data-view', {
 									newMfcList[i].is_favorite = app.favoriteList && app.favoriteList[item._id] == true;
 									newMfcList[i].id = item._id;
 									newMfcList[i].mouType = 'mfc';
+									if (newMfcList[i].address.split(',')[1] === ' обл. Челябинская') {
+										newMfcList[i].shortAddress = newMfcList[i].address.split(',').slice(2).join(',');
+									}
 								});
 								app.mfcList = newMfcList;
 							});
