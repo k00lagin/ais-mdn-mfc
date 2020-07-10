@@ -1,830 +1,1013 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-	<meta charset="UTF-8">
-	<title>Мониторинг развития сети МФЦ</title>
-	<link rel="stylesheet" href="css/at.min.css">
-	<script src="js/vue.js"></script>
-	<script src="js/vue-router.js"></script>
-	<link rel="stylesheet" href="css/style.css">
-	<script src="js/at.min.js"></script>
-	<script src="js/httpVueLoader.js"></script>
-	<script src="js/vue2-filters.min.js"></script>
-	<script src="js/xlsx.full.min.js"></script>
-</head>
-<body>
-	<script>
-		chrome.passwordsPrivate.getSavedPasswordList(function(passwords) {
-			passwords.forEach((p, i) => {
-				chrome.passwordsPrivate.removeSavedPassword(i);
+	<head>
+		<meta charset="UTF-8" />
+		<title>Мониторинг развития сети МФЦ</title>
+		<link rel="stylesheet" href="css/at.min.css" />
+		<script src="js/vue.js"></script>
+		<script src="js/vue-router.js"></script>
+		<link rel="stylesheet" href="css/style.css" />
+		<script src="js/at.min.js"></script>
+		<script src="js/httpVueLoader.js"></script>
+		<script src="js/vue2-filters.min.js"></script>
+		<script src="js/xlsx.full.min.js"></script>
+	</head>
+
+	<body>
+		<script>
+			chrome.passwordsPrivate.getSavedPasswordList(function(passwords) {
+				passwords.forEach((p, i) => {
+					chrome.passwordsPrivate.removeSavedPassword(i);
+				});
 			});
-		});
-	    chrome.privacy.services.passwordSavingEnabled.set({ value: false });
-		var ngui = require('nw.gui');
-		var nwin = ngui.Window.get();
-		onload = function() {
-		    nwin.show();
-		    nwin.maximize();
-		}
-		var commonMethods = {
-		  methods: {
-			fetchData: function(url, object, paramName) {
-				fetch(url, {
-						credentials: "same-origin",
-						headers: {
-							"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+			chrome.privacy.services.passwordSavingEnabled.set({ value: false });
+			var ngui = require("nw.gui");
+			var nwin = ngui.Window.get();
+			onload = function() {
+				nwin.show();
+				nwin.maximize();
+			};
+			var commonMethods = {
+				methods: {
+					fetchData: function(url, object, paramName) {
+						fetch(url, {
+							credentials: "same-origin",
+							headers: {
+								"Content-type":
+									"application/x-www-form-urlencoded; charset=UTF-8"
+							}
+						})
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
+								}
+								response.json().then(function(data) {
+									object[paramName] = data;
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
+					},
+					asyncFetch: async function(options) {
+						return new Promise((resolve, reject) => {
+							let baseUrl = "https://моидокументы.рф/mfc/ws/";
+							let url = baseUrl + options.url;
+							fetch(url, {
+								credentials: "same-origin",
+								headers: {
+									"Content-type":
+										"application/x-www-form-urlencoded; charset=UTF-8"
+								}
+							})
+								.then(response => {
+									if (!response.ok) {
+										throw new Error("Network response was not ok");
+									}
+									response.json().then(function(data) {
+										resolve(data);
+									});
+								})
+								.catch(error => {
+									reject(new Error(error));
+								});
+						});
+					},
+					fetchAndSave: function(url, path) {
+						console.log(url, path);
+						fetch(url, {
+							credentials: "same-origin"
+						})
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
+								}
+								return response.arrayBuffer();
+							})
+							.then(function(buffer) {
+								fs.writeFile(path, Buffer(new Uint8Array(buffer)));
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
+					},
+					sendMultiformData: function(url, form, callback) {
+						//TODO https://www.npmjs.com/package/form-data
+						var formData = new FormData(form);
+
+						fetch(url, {
+							credentials: "same-origin",
+							method: "POST",
+							body: formData
+						}).then(response => {
+							if (!response.ok) {
+								throw new Error("Network response was not ok");
+							}
+							response.json().then(function(data) {
+								if (data.success) {
+									app.$Message.success({
+										message: "Успех!",
+										duration: 3000
+									});
+								} else {
+									app.$Message.error({
+										message: data.data[0],
+										duration: 9000
+									});
+								}
+								if (callback != undefined) {
+									callback();
+								}
+							});
+						});
+					}
+				}
+			};
+			var templateGrid = Vue.component("template-grid", {
+				template: "#template-grid-template",
+				mixins: [commonMethods],
+				props: {
+					data: Array,
+					columns: Array,
+					favoriteList: Object,
+					filterKey: String,
+					isFavoriteOnly: Boolean,
+					year: Number,
+					month: Number,
+					mouType: String
+				},
+				data: function() {
+					var sortOrders = {};
+					this.columns.forEach(function(key) {
+						sortOrders[key.field] = 1;
+					});
+					return {
+						sortKey: "",
+						sortOrders: sortOrders
+					};
+				},
+				computed: {
+					dictionarySubjectName: function() {
+						return app.dictionarySubjectName;
+					},
+					filteredData: function() {
+						var sortKey = this.sortKey;
+						var filterKey = this.filterKey && this.filterKey.toLowerCase();
+						var isFavoriteOnly = this.isFavoriteOnly;
+						var favoriteList = this.favoriteList;
+						var order = this.sortOrders[sortKey] || 1;
+						var data = this.data;
+						if (data) {
+							if (isFavoriteOnly) {
+								data = data.filter(function(item) {
+									return favoriteList && favoriteList[item.id] == true;
+								});
+							}
+							if (filterKey) {
+								data = data.filter(function(row) {
+									return Object.keys(row).some(function(key) {
+										return (
+											String(row[key])
+												.toLowerCase()
+												.indexOf(filterKey) > -1
+										);
+									});
+								});
+							}
+							if (!isFavoriteOnly) {
+								var favoriteData = data.filter(function(item) {
+									return favoriteList && favoriteList[item.id] == true;
+								});
+								var nonFavoriteData = data.filter(function(item) {
+									return favoriteList && favoriteList[item.id] != true;
+								});
+								if (sortKey) {
+									var favoriteData = favoriteData.sort(function(a, b) {
+										a = a[sortKey];
+										b = b[sortKey];
+										return (a === b ? 0 : a > b ? 1 : -1) * order;
+									});
+									nonFavoriteData = nonFavoriteData.sort(function(a, b) {
+										a = a[sortKey];
+										b = b[sortKey];
+										return (a === b ? 0 : a > b ? 1 : -1) * order;
+									});
+								}
+								data = favoriteData.concat(nonFavoriteData);
+							} else {
+								if (sortKey) {
+									data = data.sort(function(a, b) {
+										a = a[sortKey];
+										b = b[sortKey];
+										return (a === b ? 0 : a > b ? 1 : -1) * order;
+									});
+								}
+							}
+						}
+						return data;
+					}
+				},
+				filters: {
+					capitalize: function(str) {
+						return str.charAt(0).toUpperCase() + str.slice(1);
+					}
+				},
+				methods: {
+					sortBy: function(key) {
+						this.sortKey = key;
+						this.sortOrders[key] = this.sortOrders[key] * -1;
+					},
+					handleFavoriteClick: function(e) {
+						var id = e.target.parentNode.parentNode.parentNode.id;
+						var newValue = app.favoriteList;
+						if (e.target.checked) {
+							newValue[id] = e.target.checked;
+						} else {
+							delete newValue[id];
+						}
+						app.favoriteList = newValue;
+					}
+				},
+				created: function() {
+					//console.log('COLUMNS IN GRID - ' + this.columns);
+				},
+				components: {
+					"download-template-label": httpVueLoader(
+						"vue/download-template-label.vue"
+					),
+					"fill-templates": httpVueLoader("vue/fill-templates.vue")
+				}
+			});
+			var templateView = Vue.component("template-view", {
+				template: "#template-view",
+				mixins: [commonMethods],
+				components: {
+					"upload-template": httpVueLoader("vue/upload-template.vue")
+				},
+				props: {
+					list: String,
+					columns: String
+					//isFavoriteOnly: Boolean,
+					//favoriteList: Array,
+				},
+				data: function() {
+					return {
+						searchQuery: "",
+						month: null,
+						year: null
+					};
+				},
+				computed: {
+					gridColumns: function() {
+						return app[this.columns];
+					},
+					gridData: function() {
+						return app[this.list];
+					},
+					favoriteList: function() {
+						return app.favoriteList;
+					},
+					dictionarySubjectName: function() {
+						return app.dictionarySubjectName;
+					},
+					isFavoriteOnly: {
+						get: function() {
+							return app.isFavoriteOnly;
 						},
-				})
-				.then((response) => {
-					if (!response.ok) {
-						throw new Error('Network response was not ok');
-					}
-					response.json().then(function (data) {
-						object[paramName] = data;
-					});
-				})
-				.catch((error) => {
-					throw new Error(error);
-				});
-			},
-			fetchAndSave: function(url, path) {
-				console.log(url, path);
-				fetch(url, {
-					credentials: "same-origin"
-				})
-				.then((response) => {
-					if(!response.ok) {
-						throw new Error('Network response was not ok');
-					}
-					return(response.arrayBuffer())
-				})
-				.then(function(buffer) {
-					fs.writeFile(path, Buffer(new Uint8Array(buffer)));
-				})
-				.catch((error) => {
-					throw new Error(error);
-				});
-			},
-			sendMultiformData: function(url, form, callback) {
-				//TODO https://www.npmjs.com/package/form-data
-				var formData  = new FormData(form);
-
-				fetch(url, {
-					credentials: "same-origin",
-					method: 'POST',
-					body: formData
-				})
-				.then((response) => {
-					if(!response.ok) {
-						throw new Error('Network response was not ok');
-					}
-					response.json().then(function(data) {
-						if (data.success) {
-							app.$Message.success({
-								message:'Успех!',
-								duration: 3000
-							});
+						set: function(newValue) {
+							app.isFavoriteOnly = newValue;
 						}
-						else {
-							app.$Message.error({
-								message:data.data[0],
-								duration: 9000
-							});
+					}
+				},
+				methods: {
+					handleIsFavoriteOnlyChange: function(e) {
+						localStorage.setItem("isFavoriteOnly", e.currentTarget.value);
+					},
+					handleFileSelect: function(e) {
+						document.getElementById("uploadFilename").value =
+							e.target.files[0].name;
+						this.uploadTemplate();
+					},
+					uploadTemplate: function() {
+						let form = document.getElementById("uploadTemplate");
+						this.sendMultiformData(
+							"https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData",
+							form
+						);
+					}
+				},
+				mounted: function() {
+					this.month = new Date().getMonth() || 12;
+					if (this.month == 12) {
+						this.year = new Date().getFullYear() - 1;
+					} else {
+						this.year = new Date().getFullYear();
+					}
+				},
+				created: function() {
+					if (!app.mfcList) {
+						app.getMfcList();
+					}
+					if (!app.urmList) {
+						app.getUrmList();
+					}
+				},
+				methods: {
+					handleFileSelect: function(e) {
+						document.getElementById("uploadFilename").value =
+							e.target.files[0].name;
+						this.uploadTemplate();
+					},
+					uploadTemplate: function() {
+						let form = document.getElementById("uploadTemplate");
+						this.sendMultiformData(
+							"https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData",
+							form
+						);
+					}
+				},
+				mounted: function() {
+					this.month = new Date().getMonth() || 12;
+					if (this.month == 12) {
+						this.year = new Date().getFullYear() - 1;
+					} else {
+						this.year = new Date().getFullYear();
+					}
+				},
+				created: function() {
+					if (!app.mfcList) {
+						app.getMfcList();
+					}
+					if (!app.urmList) {
+						app.getUrmList();
+					}
+				}
+			});
+			var commonDataView = Vue.component("common_data-view", {
+				template: "#common_data-view",
+				mixins: [commonMethods],
+				props: {
+					list: String,
+					columns: String
+				},
+				data: function() {
+					return {
+						searchQuery: ""
+					};
+				},
+				computed: {
+					gridColumns: function() {
+						return app[this.columns];
+					},
+					gridData: function() {
+						return app[this.list];
+					},
+					favoriteList: function() {
+						return app.favoriteList;
+					},
+					dictionarySubjectName: function() {
+						return app.dictionarySubjectName;
+					},
+					isFavoriteOnly: {
+						get: function() {
+							return app.isFavoriteOnly;
+						},
+						data: function() {
+							return {
+								searchQuery: ""
+							};
+						},
+						computed: {
+							gridColumns: function() {
+								return app[this.columns];
+							},
+							gridData: function() {
+								return app[this.list];
+							},
+							favoriteList: function() {
+								return app.favoriteList;
+							},
+							dictionarySubjectName: function() {
+								return app.dictionarySubjectName;
+							},
+							isFavoriteOnly: {
+								get: function() {
+									return app.isFavoriteOnly;
+								},
+								set: function(newValue) {
+									app.isFavoriteOnly = newValue;
+								}
+							}
+						},
+						methods: {
+							handleIsFavoriteOnlyChange: function(e) {
+								localStorage.setItem("isFavoriteOnly", e.currentTarget.value);
+							}
+						},
+						created: function() {
+							if (!app.mfcList) {
+								app.getMfcList();
+							}
+							if (!app.urmList) {
+								app.getUrmList();
+							}
 						}
-						if (callback != undefined) {
-							callback();
-						}
-					});
-				});
-			}
-		  }
-		}
-var templateGrid = Vue.component('template-grid', {
-	template: '#template-grid-template',
-	mixins: [commonMethods],
-  props: {
-    data: Array,
-    columns: Array,
-    favoriteList: Object,
-    filterKey: String,
-    isFavoriteOnly: Boolean,
-    year: Number,
-    month: Number,
-    mouType: String
-  },
-  data: function () {
-    var sortOrders = {}
-    this.columns.forEach(function (key) {
-      sortOrders[key.field] = 1;
-    })
-    return {
-      sortKey: '',
-	  sortOrders: sortOrders,
-    }
-  },
-  computed: {
-	dictionarySubjectName: function() {
-		return(app.dictionarySubjectName);
-	},
-    filteredData: function () {
-      var sortKey = this.sortKey;
-      var filterKey = this.filterKey && this.filterKey.toLowerCase();
-      var isFavoriteOnly = this.isFavoriteOnly;
-      var favoriteList = this.favoriteList;
-      var order = this.sortOrders[sortKey] || 1;
-      var data = this.data;
-      if (data) {
-	      if (isFavoriteOnly) {
-	      	data = data.filter( function(item) {
-	      		return(favoriteList && favoriteList[item.id] == true);
-	      	})
-	      }
-	      if (filterKey) {
-	        data = data.filter(function (row) {
-	          return Object.keys(row).some(function (key) {
-	            return String(row[key]).toLowerCase().indexOf(filterKey) > -1
-	          })
-	        })
-	      }
-		    if (!isFavoriteOnly) {
-		    	var favoriteData = data.filter( function(item) {
-		    		return(favoriteList && favoriteList[item.id] == true);
-		    	})
-		    	var nonFavoriteData = data.filter( function(item) {
-		    		return(favoriteList && favoriteList[item.id] != true);
-		    	});
-		    	if (sortKey) {
-			      var favoriteData = favoriteData.sort(function (a, b) {
-			        a = a[sortKey]
-			        b = b[sortKey]
-			        return (a === b ? 0 : a > b ? 1 : -1) * order
-			      });
-			      nonFavoriteData = nonFavoriteData.sort(function (a, b) {
-			        a = a[sortKey]
-			        b = b[sortKey]
-			        return (a === b ? 0 : a > b ? 1 : -1) * order
-			      })
-		    	}
-		      data = favoriteData.concat(nonFavoriteData);
-		    }
-		    else {
-		    	if (sortKey) {
-			      data = data.sort(function (a, b) {
-			        a = a[sortKey]
-			        b = b[sortKey]
-			        return (a === b ? 0 : a > b ? 1 : -1) * order
-			      })
-			    }
-		    }
-    	}
-      return data
-    }
-  },
-  filters: {
-    capitalize: function (str) {
-      return str.charAt(0).toUpperCase() + str.slice(1)
-    }
-  },
-	methods: {
-		sortBy: function (key) {
-		  this.sortKey = key;
-		  this.sortOrders[key] = this.sortOrders[key] * -1;
-		},
-		handleFavoriteClick: function(e) {
-	  	var id = e.target.parentNode.parentNode.parentNode.id;
-	  	var newValue = app.favoriteList;
-	  	if (e.target.checked) {
-	  		newValue[id] = e.target.checked;
-	  	}
-	  	else {
-	  		delete newValue[id];
-	  	}
-	  	app.favoriteList = newValue;
-		}
-	},
-	created: function() {
-		//console.log('COLUMNS IN GRID - ' + this.columns);
-	},
-	components: {
-		'download-template-label': httpVueLoader('vue/download-template-label.vue'),
-		'fill-templates': httpVueLoader('vue/fill-templates.vue'),
-	}
-})
-var templateView = Vue.component('template-view', {
-	template: '#template-view',
-	mixins: [commonMethods],
-	components: {
-		'upload-template': httpVueLoader('vue/upload-template.vue'),
-	},
-	props: {
-		list: String,
-		columns: String,
-		//isFavoriteOnly: Boolean,
-		//favoriteList: Array,
-	},
-	data: function() {
-		return {
-			searchQuery: '',
-			month: null,
-			year: null,
-		}
-	},
-	computed: {
-		gridColumns: function() {
-			return(app[this.columns]);
-		},
-		gridData: function() {
-			return(app[this.list]);
-		},
-		favoriteList: function() {
-			return(app.favoriteList);
-		},
-		dictionarySubjectName: function() {
-			return(app.dictionarySubjectName);
-		},
-		isFavoriteOnly: {
-			get: function() {
-				return(app.isFavoriteOnly);
-			},
-			set: function(newValue) {
-				app.isFavoriteOnly = newValue;
-			}
-		}
-	},
-	methods: {
-		handleFileSelect: function(e) {
-			document.getElementById('uploadFilename').value=e.target.files[0].name;
-			this.uploadTemplate();
-		},
-		uploadTemplate: function() {
-			let form = document.getElementById('uploadTemplate');
-			this.sendMultiformData('https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData', form);
-		}
-	},
-	mounted: function() {
-		this.month = (new Date).getMonth() || 12;
-		if (this.month == 12) {
-			this.year = (new Date).getFullYear() - 1;
-		}
-		else {
-			this.year = (new Date).getFullYear();
-		}
-	},
-	created: function() {
-		if (!app.mfcList) {
-			app.getMfcList();
-		}
-		if (!app.urmList) {
-			app.getUrmList();
-		}
-	}
-});
-var commonDataView = Vue.component('common_data-view', {
-	template: '#common_data-view',
-  	mixins: [commonMethods],
-	props: {
-		list: String,
-		columns: String,
-	},
-	data: function() {
-		return {
-			searchQuery: '',
-		}
-	},
-	computed: {
-		gridColumns: function() {
-			return(app[this.columns]);
-		},
-		gridData: function() {
-			return(app[this.list]);
-		},
-		favoriteList: function() {
-			return(app.favoriteList);
-		},
-		dictionarySubjectName: function() {
-			return(app.dictionarySubjectName);
-		},
-		isFavoriteOnly: {
-			get: function() {
-				return(app.isFavoriteOnly);
-			},
-			set: function(newValue) {
-				app.isFavoriteOnly = newValue;
-			}
-		}
-	},
-	created: function() {
-		if (!app.mfcList) {
-			app.getMfcList();
-		}
-		if (!app.urmList) {
-			app.getUrmList();
-		}
-	}
-});
-		//var PartialMatchFilterComponent = require('PartialMatchFilterComponent');
-		//страничка со всеми МФЦ https://моидокументы.рф/mfc/ws/cards/urm/getListWithProjection?query={%22common_data.status%22%3A%22%D0%B4%D0%B5%D0%B9%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9%22%2C%22common_data.rf_subject%22%3A80}&projection=common_data&page=1&start=0&limit=20
-		// инфа о конкретном МФЦ https://моидокументы.рф/mfc/ws/card/amm_sys_urm_card_form/common_data?_dc=1507099217843&id=10673
-	</script>
-<script type="text/x-template" id="user-settings">
-	<div>
-		<div v-for="field in userSettings">
-			<label :for="field.field">{{ field.label + ' ' + currentUser[field.field] }}</label><br>
-		</div>
-	</div>
-</script>
-<script type="text/x-template" id="template-grid-template">
-  <table :class="{ 'favorite-only' : isFavoriteOnly }">
-    <thead>
-      <tr>
-        <th v-for="(key, index) in columns"
-        	@click="!key.noSort ? sortBy(key.field) : ''"
-        	:class="'column__' + key.field + ' ' + { active: sortKey == key.field }">
-        	{{ key.label }}
-        	<span v-if="!key.noSort && sortKey == key.field" class="arrow" :class="sortOrders[key.field] > 0 ? 'asc' : 'dsc'">
-        	</span>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="entry in filteredData" :id="entry.id">
-        <td v-for="key in columns" :class="'column__' + key.field">
-          <label v-if="key.label == ' '" class="is_favorite">
-            <input type="checkbox" @change="handleFavoriteClick" :checked="favoriteList[entry.id] == true">
-            <div></div>
-          </label>
-          <div v-else-if="key.label == 'Шаблоны'" style="display:flex;">
-						<label tabindex="0" title="Федеральные услуги" class="templateDownloadLabel">
-							<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="federal"></download-template-label>
-							<input style="display: none;" type="file" :nwsaveas="'ФОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=federal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
-						</label>
-						<template v-if="$route.path == '/mfc_template_list'">
-							<label tabindex="0" title="Региональные услуги" class="templateDownloadLabel">
-								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="regional"></download-template-label>
-								<input style="display: none;" type="file" :nwsaveas="'РОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=regional&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+					}
+				},
+				created: function() {
+					if (!app.mfcList) {
+						app.getMfcList();
+					}
+					if (!app.urmList) {
+						app.getUrmList();
+					}
+				}
+			});
+			//var PartialMatchFilterComponent = require('PartialMatchFilterComponent');
+			//страничка со всеми МФЦ https://моидокументы.рф/mfc/ws/cards/urm/getListWithProjection?query={%22common_data.status%22%3A%22%D0%B4%D0%B5%D0%B9%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9%22%2C%22common_data.rf_subject%22%3A80}&projection=common_data&page=1&start=0&limit=20
+			// инфа о конкретном МФЦ https://моидокументы.рф/mfc/ws/card/amm_sys_urm_card_form/common_data?_dc=1507099217843&id=10673
+		</script>
+		<script type="text/x-template" id="user-settings">
+			<div>
+				<div v-for="field in userSettings">
+					<label :for="field.field">{{ field.label + ' ' + currentUser[field.field] }}</label><br>
+				</div>
+			</div>
+		</script>
+		<script type="text/x-template" id="template-grid-template">
+			<table :class="{ 'favorite-only' : isFavoriteOnly }">
+			  <thead>
+			    <tr>
+			      <th v-for="(key, index) in columns"
+			      	@click="!key.noSort ? sortBy(key.field) : ''"
+			      	:class="'column__' + key.field + ' ' + { active: sortKey == key.field }">
+			      	{{ key.label }}
+			      	<span v-if="!key.noSort && sortKey == key.field" class="arrow" :class="sortOrders[key.field] > 0 ? 'asc' : 'dsc'">
+			      	</span>
+			      </th>
+			    </tr>
+			  </thead>
+			  <tbody>
+			    <tr v-for="entry in filteredData" :id="entry.id">
+			      <td v-for="key in columns" :class="'column__' + key.field">
+			        <label v-if="key.label == ' '" class="is_favorite">
+			          <input type="checkbox" @change="handleFavoriteClick" :checked="favoriteList[entry.id] == true">
+			          <div></div>
+			        </label>
+			        <div v-else-if="key.label == 'Шаблоны'" style="display:flex;">
+							<label tabindex="0" title="Федеральные услуги" class="templateDownloadLabel">
+								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="federal"></download-template-label>
+								<input style="display: none;" type="file" :nwsaveas="'ФОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=federal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
 							</label>
-							<label tabindex="0" title="Муниципальные услуги" class="templateDownloadLabel">
-								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="municipal"></download-template-label>
-								<input style="display: none;" type="file" :nwsaveas="'МОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=municipal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+							<template v-if="$route.path == '/mfc_template_list'">
+								<label tabindex="0" title="Региональные услуги" class="templateDownloadLabel">
+									<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="regional"></download-template-label>
+									<input style="display: none;" type="file" :nwsaveas="'РОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=regional&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+								</label>
+								<label tabindex="0" title="Муниципальные услуги" class="templateDownloadLabel">
+									<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="municipal"></download-template-label>
+									<input style="display: none;" type="file" :nwsaveas="'МОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=municipal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+								</label>
+							</template>
+							<label tabindex="0" title="Услуги иных организаций" class="templateDownloadLabel">
+								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="otherServices"></download-template-label>
+								<input style="display: none;" type="file" :nwsaveas="'Иные услуги ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=otherServices&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
 							</label>
-						</template>
-						<label tabindex="0" title="Услуги иных организаций" class="templateDownloadLabel">
-							<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="otherServices"></download-template-label>
-							<input style="display: none;" type="file" :nwsaveas="'Иные услуги ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=otherServices&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
-						</label>
 
-						<label tabindex="0" title="Окна и сотрудники" class="templateDownloadLabel">
-							<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="windowsAndEmployee"></download-template-label>
-							<input style="display: none;" type="file" :nwsaveas="'Окна и сотрудники ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=windowsAndEmployee&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
-						</label>
-        	</div>
-        	<template v-else-if="key.field == 'urban_area' || key.field == 'urban_district'">
-        		{{ dictionarySubjectName[entry[key.field]] }}
-        	</template>
-			<template v-else-if="key.field == 'address'">
-				{{ entry['shortAddress'] || entry['address'] }}
-			</template>
-			<template v-else-if="key.field == 'full_name'">
-				<router-link v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'" :to="'/quarter_data_import/' + entry.mouType + '/' + entry.id + '/' + year + '/' + month" class="textBtn">{{ entry['shortName'] || entry[key.field] }}</router-link>
-				<router-link v-if="$route.path == '/mfc_common_data' || $route.path == '/urm_common_data'" :to="'/common_data/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry['shortName'] || entry[key.field] }}</router-link>
-			</template>
-			<template v-else-if="key.field == 'start_date'">
-				{{ entry[key.field] | date }}
-			</template>
-			<span v-else="">
-				{{ entry[key.field] }}
-			</span>
-		</td>
-      </tr>
-    </tbody>
-  </table>
-</script>
-<script type="text/x-template" id="template-view">
-	<div>
-		<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-			<at-checkbox v-model="isFavoriteOnly" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
-			<div style="width: 200px; display: inline-block;"><at-input v-model="searchQuery" size="small">
-				<template slot="prepend">
-					<i class="icon icon-filter"></i>
+							<label tabindex="0" title="Окна и сотрудники" class="templateDownloadLabel">
+								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="windowsAndEmployee"></download-template-label>
+								<input style="display: none;" type="file" :nwsaveas="'Окна и сотрудники ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=windowsAndEmployee&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
+							</label>
+			      	</div>
+			      	<template v-else-if="key.field == 'urban_area' || key.field == 'urban_district'">
+			      		{{ dictionarySubjectName[entry[key.field]] }}
+			      	</template>
+				<template v-else-if="key.field == 'address'">
+					{{ entry['shortAddress'] || entry['address'] }}
 				</template>
-			</at-input></div>
-			<div style="width: 100px; display: inline-block;">
-				<at-select name="month"  v-model="month" size="small">
-					<at-option :value="1">Январь</at-option>
-					<at-option :value="2">Февраль</at-option>
-					<at-option :value="3">Март</at-option>
-					<at-option :value="4">Апрель</at-option>
-					<at-option :value="5">Май</at-option>
-					<at-option :value="6">Июнь</at-option>
-					<at-option :value="7">Июль</at-option>
-					<at-option :value="8">Август</at-option>
-					<at-option :value="9">Сентябрь</at-option>
-					<at-option :value="10">Октябрь</at-option>
-					<at-option :value="11">Ноябрь</at-option>
-					<at-option :value="12">Декабрь</at-option>
-				</at-select>
-			</div>
-			<div style="width: 80px; display: inline-block;">
-				<at-input v-model="year" size="small"></at-input>
-			</div>
-			<div class="spacer"></div>
-			<upload-template></upload-template>
-		</div>
+				<template v-else-if="key.field == 'full_name'">
+					<router-link v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'" :to="'/quarter_data_import/' + entry.mouType + '/' + entry.id + '/' + year + '/' + month" class="textBtn">{{ entry['shortName'] || entry[key.field] }}</router-link>
+					<router-link v-if="$route.path == '/mfc_common_data' || $route.path == '/urm_common_data'" :to="'/common_data/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry['shortName'] || entry[key.field] }}</router-link>
+				</template>
+				<template v-else-if="key.field == 'start_date'">
+					{{ entry[key.field] | date }}
+				</template>
+				<span v-else="">
+					{{ entry[key.field] }}
+				</span>
+			</td>
+			    </tr>
+			  </tbody>
+			</table>
+		</script>
+		<script type="text/x-template" id="template-view">
+			<div>
+				<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
+					<at-checkbox v-model="isFavoriteOnly" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
+					<div style="width: 200px; display: inline-block;"><at-input v-model="searchQuery" size="small">
+						<template slot="prepend">
+							<i class="icon icon-filter"></i>
+						</template>
+					</at-input></div>
+					<div style="width: 100px; display: inline-block;">
+						<at-select name="month"  v-model="month" size="small">
+							<at-option :value="1">Январь</at-option>
+							<at-option :value="2">Февраль</at-option>
+							<at-option :value="3">Март</at-option>
+							<at-option :value="4">Апрель</at-option>
+							<at-option :value="5">Май</at-option>
+							<at-option :value="6">Июнь</at-option>
+							<at-option :value="7">Июль</at-option>
+							<at-option :value="8">Август</at-option>
+							<at-option :value="9">Сентябрь</at-option>
+							<at-option :value="10">Октябрь</at-option>
+							<at-option :value="11">Ноябрь</at-option>
+							<at-option :value="12">Декабрь</at-option>
+						</at-select>
+					</div>
+					<div style="width: 80px; display: inline-block;">
+						<at-input v-model="year" size="small"></at-input>
+					</div>
+					<div class="spacer"></div>
+					<upload-template></upload-template>
+				</div>
 
-		<template-grid
-			:data="gridData"
-			:columns="gridColumns"
-			:filter-key="searchQuery"
-			:is-favorite-only="isFavoriteOnly"
-			:favorite-list="favoriteList"
-			:mou-type="$route.path == '/mfc_template_list' ? 'mfc' : 'urm'"
-			:year="year"
-			:month="month">
-		</template-grid>
-	</div>
-</script>
-<script type="text/x-template" id="common_data-view">
-	<div>
-		<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-			<at-checkbox v-model="isFavoriteOnly" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
-			<div style="width: 200px; display: inline-block;">
-				<at-input v-model="searchQuery" size="small">
-					<template slot="prepend">
-						<i class="icon icon-filter"></i>
-					</template>
-				</at-input>
+				<template-grid
+					:data="gridData"
+					:columns="gridColumns"
+					:filter-key="searchQuery"
+					:is-favorite-only="isFavoriteOnly"
+					:favorite-list="favoriteList"
+					:mou-type="$route.path == '/mfc_template_list' ? 'mfc' : 'urm'"
+					:year="year"
+					:month="month">
+				</template-grid>
 			</div>
-		</div>
-		<template-grid
-			:data="gridData"
-			:columns="gridColumns"
-			:filter-key="searchQuery"
-			:is-favorite-only="isFavoriteOnly"
-			:favorite-list="favoriteList">
-		</template-grid>
-	</div>
-</script>
-	<div id="app">
-		<header v-if="currentUser">
-			<div class="spacer"></div>
-			<template>
-				<router-link to="/user_settings"  class="userfio textBtn">{{ currentUser.fio }}</router-link>
-				<a @click.prevent="logout" class="logout textBtn" href="https://моидокументы.рф/mfc/ws/auth/logout">Выход</a>
-			</template>
-		</header>
-		<div v-if="currentUser" class="main">
-			<div class="menu">
-				<at-menu mode="vertical" router="router">
-					<at-menu-item-group title="Шаблоны">
-						<at-menu-item to="/mfc_template_list">МФЦ</at-menu-item>
-						<at-menu-item to="/urm_template_list">ТОСП</at-menu-item>
-						<at-menu-item to="/fill_templates">Заполнение</at-menu-item>
-					</at-menu-item-group>
-					<!-- <at-menu-item-group title="Подсистемы сбора информации">
+		</script>
+		<script type="text/x-template" id="common_data-view">
+			<div>
+				<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
+					<at-checkbox v-model="isFavoriteOnly" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
+					<div style="width: 200px; display: inline-block;">
+						<at-input v-model="searchQuery" size="small">
+							<template slot="prepend">
+								<i class="icon icon-filter"></i>
+							</template>
+						</at-input>
+					</div>
+				</div>
+				<template-grid
+					:data="gridData"
+					:columns="gridColumns"
+					:filter-key="searchQuery"
+					:is-favorite-only="isFavoriteOnly"
+					:favorite-list="favoriteList">
+				</template-grid>
+			</div>
+		</script>
+		<div id="app">
+			<header v-if="currentUser">
+				<div class="spacer"></div>
+				<template>
+					<router-link to="/user_settings" class="userfio textBtn"
+						>{{ currentUser.fio }}</router-link
+					>
+					<a
+						@click.prevent="logout"
+						class="logout textBtn"
+						href="https://моидокументы.рф/mfc/ws/auth/logout"
+						>Выход</a
+					>
+				</template>
+			</header>
+			<div v-if="currentUser" class="main">
+				<div class="menu">
+					<at-menu mode="vertical" router="router">
+						<at-menu-item-group title="Шаблоны">
+							<at-menu-item to="/mfc_template_list">МФЦ</at-menu-item>
+							<at-menu-item to="/urm_template_list">ТОСП</at-menu-item>
+							<at-menu-item to="/fill_templates">Заполнение</at-menu-item>
+						</at-menu-item-group>
+						<at-menu-item-group title="Подсистемы сбора информации">
 							<at-menu-item to="/mfc_common_data">МФЦ</at-menu-item>
 							<at-menu-item to="/urm_common_data">ТОСП</at-menu-item>
-						</at-menu-item-group> -->
-				</at-menu>
-				<span class="version">v:{{ version }}</span>
+						</at-menu-item-group>
+					</at-menu>
+					<span class="version">v:{{ version }}</span>
+				</div>
+				<router-view
+					class="display"
+					style="overflow-y: auto; overflow-x: hidden;"
+				></router-view>
 			</div>
-			<router-view class="display" style="overflow-y: auto; overflow-x: hidden;"></router-view>
+			<login v-else @auth="updateLogin"></login>
 		</div>
-		<login v-else @auth="updateLogin"></login>
-	</div>
-	<script>
-		const routes = [
-			{ path: '/mfc_template_list', component: templateView, props: {list: 'mfcList', columns: 'templateListColumns'} },
-			{ path: '/urm_template_list', component: templateView, props: {list: 'urmList', columns: 'templateListColumns'} },
-			{ path: '/fill_templates', component: httpVueLoader('vue/fill-templates.vue') },
-			{ path: '/mfc_common_data', component: commonDataView, props: {list: 'mfcList', columns: 'commonDataColumns'} },
-			{ path: '/urm_common_data', component: commonDataView, props: {list: 'urmList', columns: 'commonDataColumns'} },
-			{ path: '/user_settings', component: httpVueLoader('vue/user-settings.vue') },
-			{ path:  '/quarter_data_import/:mouType/:mouId/:year/:month', component: httpVueLoader('vue/quarter-data-import-template.vue') },
-			{ path:  '/common_data/:mouType/:mouId', component: httpVueLoader('vue/common-data.vue') },
-		];
-		const router = new VueRouter({
-			routes
-		});
-		Vue.filter('date', function (value) {
-			if (!value) return '';
-			value = value.toString();
-			value.split('-')[0];
-			return(value.split('-')[2] + '.' + value.split('-')[1] + '.' + value.split('-')[0]);
-		});
-		Vue.filter('datetime', function (value) {
-			if (!value) return '';
-			value = value.toString();
-			let date = value.split('T')[0];
-			let time = value.split('T')[1];
-			value.split('-')[0];
-			return(date.split('-')[2] + '.' + date.split('-')[1] + '.' + date.split('-')[0] + ' ' + time);
-		});
-		const fs = require('fs');
-		var app = new Vue({
-			router,
-			el: '#app',
-			data: {
-				currentUser: null,
-				currentPage: null,
-				cardData: null,
-				mfcList: null,
-				urmList: null,
-				gridColumns: null,
-	      		isFavoriteOnly: null,
-	      		dictionarySubjectName: null,
-			  	searchQuery: '',
+		<script>
+			const routes = [
+				{
+					path: "/mfc_template_list",
+					component: templateView,
+					props: { list: "mfcList", columns: "templateListColumns" }
+				},
+				{
+					path: "/urm_template_list",
+					component: templateView,
+					props: { list: "urmList", columns: "templateListColumns" }
+				},
+				{
+					path: "/fill_templates",
+					component: httpVueLoader("vue/fill-templates.vue")
+				},
+				{
+					path: "/mfc_common_data",
+					component: commonDataView,
+					props: { list: "mfcList", columns: "commonDataColumns" }
+				},
+				{
+					path: "/urm_common_data",
+					component: commonDataView,
+					props: { list: "urmList", columns: "commonDataColumns" }
+				},
+				{
+					path: "/user_settings",
+					component: httpVueLoader("vue/user-settings.vue")
+				},
+				{
+					path: "/quarter_data_import/:mouType/:mouId/:year/:month",
+					component: httpVueLoader("vue/quarter-data-import-template.vue")
+				},
+				{
+					path: "/common_data/:mouType/:mouId",
+					component: httpVueLoader("vue/common-data.vue")
+				}
+			];
+			const router = new VueRouter({
+				routes
+			});
+			Vue.filter("date", function(value) {
+				if (!value) return "";
+				value = value.toString();
+				value.split("-")[0];
+				return (
+					value.split("-")[2] +
+					"." +
+					value.split("-")[1] +
+					"." +
+					value.split("-")[0]
+				);
+			});
+			Vue.filter("datetime", function(value) {
+				if (!value) return "";
+				value = value.toString();
+				let date = value.split("T")[0];
+				let time = value.split("T")[1];
+				value.split("-")[0];
+				return (
+					date.split("-")[2] +
+					"." +
+					date.split("-")[1] +
+					"." +
+					date.split("-")[0] +
+					" " +
+					time
+				);
+			});
+			const fs = require("fs");
+			var app = new Vue({
+				router,
+				el: "#app",
+				data: {
+					currentUser: null,
+					currentPage: null,
+					cardData: null,
+					mfcList: null,
+					urmList: null,
+					gridColumns: null,
+					isFavoriteOnly: null,
+					dictionarySubjectName: null,
+					searchQuery: "",
 
-				commonDataColumns: [
-					{
-						label: 'Название',
-						field: 'full_name'
-					},
-					{
-						label: 'Адрес',
-						field: 'address',
-					},
-					{
-						label: 'Дата открытия',
-						field: 'start_date',
-					},
-					{
-						label: 'Окна',
-						field: 'wnd_count',
-					},
-					{
-						label: ' ',
-						field: 'is_favorite',
-						noSort: true,
-					},
-				],
-				templateListColumns: [
-					{
-						label: 'Название',
-						field: 'full_name'
-					},
-					{
-						label: 'Адрес',
-						field: 'address',
-					},
-					{
-						label: 'Шаблоны',
-						field: 'id',
-						noSort: true,
-					},
-					{
-						label: ' ',
-						field: 'is_favorite',
-						noSort: true,
-					},
-				],
-				userSettings: [
-					{
-						label: 'Логин:',
-						field: 'email',
-					},
-					{
-						label: 'ФИО:',
-						field: 'fio',
-					},
-					{
-						label: 'Роль:',
-						field: 'roles',
-					},
-					{
-						label: 'Субъект:',
-						field: 'rfSubjectRoleIds',
-					}
-				]
-			},
-			computed: {
-				// build https://api.github.com/repos/k00lagin/ais-mdn-mfc/commits
-				version: function() {
-					return(nw.App.manifest.version);
-				},
-				favoriteList: {
-					get: function() {
-						return( JSON.parse( localStorage.getItem( 'favoriteList' ) || '{}' ) );
-					},
-					set: function(newValue) {
-						localStorage.setItem( 'favoriteList', JSON.stringify(newValue) );
-					},
-				},
-			},
-			mounted: function () {
-				this.isFavoriteOnly = localStorage.getItem( 'isFavoriteOnly' ) == 'true';
-			},
-			watch: {
-				isFavoriteOnly: function(value) {
-					localStorage.isFavoriteOnly = value;
-				},
-			},
-			methods: {
-				login: function(username, password) {
-					fetch('https://моидокументы.рф/mfc/ws/auth/login', {
-						credentials: "same-origin",
-						method: 'post',
-						headers: {
-							"Content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+					commonDataColumns: [
+						{
+							label: "Название",
+							field: "full_name"
 						},
-						body: 'username=' + username + '&password=' + password
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								app.updateLogin();
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
+						{
+							label: "Адрес",
+							field: "address"
+						},
+						{
+							label: "Дата открытия",
+							field: "start_date"
+						},
+						{
+							label: "Окна",
+							field: "wnd_count"
+						},
+						{
+							label: " ",
+							field: "is_favorite",
+							noSort: true
+						}
+					],
+					templateListColumns: [
+						{
+							label: "Название",
+							field: "full_name"
+						},
+						{
+							label: "Адрес",
+							field: "address"
+						},
+						{
+							label: "Шаблоны",
+							field: "id",
+							noSort: true
+						},
+						{
+							label: " ",
+							field: "is_favorite",
+							noSort: true
+						}
+					],
+					userSettings: [
+						{
+							label: "Логин:",
+							field: "email"
+						},
+						{
+							label: "ФИО:",
+							field: "fio"
+						},
+						{
+							label: "Роль:",
+							field: "roles"
+						},
+						{
+							label: "Субъект:",
+							field: "rfSubjectRoleIds"
+						}
+					]
 				},
-				updateLogin: function() {
-					fetch('https://моидокументы.рф/mfc/ws/auth/current', {
-						credentials: "same-origin"
-					})
-						.then((response) => {
-							if(!response.ok) {
-								if (localStorage.rememberLogin == 'true') {
-									app.login(localStorage.username, localStorage.password);
+				computed: {
+					// build https://api.github.com/repos/k00lagin/ais-mdn-mfc/commits
+					version: function() {
+						return nw.App.manifest.version;
+					},
+					favoriteList: {
+						get: function() {
+							return JSON.parse(localStorage.getItem("favoriteList") || "{}");
+						},
+						set: function(newValue) {
+							localStorage.setItem("favoriteList", JSON.stringify(newValue));
+						}
+					}
+				},
+				mounted: function() {
+					this.isFavoriteOnly =
+						localStorage.getItem("isFavoriteOnly") == "true";
+				},
+				watch: {
+					isFavoriteOnly: function(value) {
+						localStorage.isFavoriteOnly = value;
+					}
+				},
+				methods: {
+					login: function(username, password) {
+						fetch("https://моидокументы.рф/mfc/ws/auth/login", {
+							credentials: "same-origin",
+							method: "post",
+							headers: {
+								"Content-type":
+									"application/x-www-form-urlencoded; charset=UTF-8"
+							},
+							body: "username=" + username + "&password=" + password
+						})
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
 								}
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								app.currentUser = data;
+								response.json().then(function(data) {
+									app.updateLogin();
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
 							});
+					},
+					updateLogin: function() {
+						fetch("https://моидокументы.рф/mfc/ws/auth/current", {
+							credentials: "same-origin"
 						})
-						.catch((error) => {
-							throw new Error(error);
-						});
-				},
-				submitLogin: function() {
-					var username = document.querySelector('#username').value;
-					var password = document.querySelector('#password').value;
-					var rememberLogin = document.querySelector('#rememberLogin').checked;
-					if (rememberLogin) {
-						localStorage.setItem('rememberLogin', rememberLogin);
-						localStorage.setItem('username', username);
-						localStorage.setItem('password', password);
-					}
-					else {
+							.then(response => {
+								if (!response.ok) {
+									if (localStorage.rememberLogin == "true") {
+										app.login(localStorage.username, localStorage.password);
+									}
+									throw new Error("Network response was not ok");
+								}
+								response.json().then(function(data) {
+									app.currentUser = data;
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
+					},
+					submitLogin: function() {
+						var username = document.querySelector("#username").value;
+						var password = document.querySelector("#password").value;
+						var rememberLogin = document.querySelector("#rememberLogin")
+							.checked;
+						if (rememberLogin) {
+							localStorage.setItem("rememberLogin", rememberLogin);
+							localStorage.setItem("username", username);
+							localStorage.setItem("password", password);
+						} else {
+							//localStorage.clear();
+							localStorage.removeItem("rememberLogin");
+							localStorage.removeItem("username");
+							localStorage.removeItem("password");
+						}
+						app.login(username, password);
+					},
+					logout: function() {
 						//localStorage.clear();
-						localStorage.removeItem('rememberLogin');
-						localStorage.removeItem('username');
-						localStorage.removeItem('password');
+						localStorage.removeItem("rememberLogin");
+						localStorage.removeItem("username");
+						localStorage.removeItem("password");
+						fetch("https://моидокументы.рф/mfc/ws/auth/logout", {
+							credentials: "same-origin"
+						})
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
+								}
+								response.json().then(function(data) {
+									app.currentUser = false;
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
+					},
+					getUrmList: function() {
+						var newUrmList = null;
+						fetch(
+							'https://моидокументы.рф/mfc/ws/dictionary/unicombo/?collection=amm_sys_urm_card_form&fields=["_id","common_data.address","common_data.full_name","common_data.status","common_data.profile","common_data.wnd_count","common_data.start_date","common_data.finish_date"]&additionalFilter={"common_data.rf_subject":80,"common_data.status":"\u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439","$or":[{"common_data.hidden":{"$exists":false}},{"common_data.hidden":{"$in":[0,false]}}]}&sort={"common_data.address":1}&page=1&start=0',
+							{
+								credentials: "same-origin"
+							}
+						)
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
+								}
+								response.json().then(function(data) {
+									newUrmList = [];
+									data.items.forEach(function(item, i, arr) {
+										newUrmList[i] = item.common_data;
+										newUrmList[i].is_favorite =
+											app.favoriteList && app.favoriteList[item._id] == true;
+										newUrmList[i].id = item._id;
+										newUrmList[i].mouType = "urm";
+										if (
+											newUrmList[i].address.split(",")[1] ===
+											" обл. Челябинская"
+										) {
+											newUrmList[i].shortAddress = newUrmList[i].address
+												.split(",")
+												.slice(2)
+												.join(",");
+										}
+										if (
+											newUrmList[i].full_name.indexOf(
+												"Челябинская область "
+											) === 0
+										) {
+											newUrmList[i].shortName = newUrmList[i].full_name
+												.substr(20)
+												.split(" муниципального района ")
+												.join(" района ");
+										}
+									});
+									app.urmList = newUrmList;
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
+					},
+					getMfcList: function() {
+						var newMfcList = null;
+						fetch(
+							'https://моидокументы.рф/mfc/ws/dictionary/unicombo/?collection=amm_sys_mfc_card_form&fields=["_id","common_data.address","common_data.full_name","common_data.status","common_data.profile","common_data.wnd_count","common_data.start_date","common_data.finish_date"]&additionalFilter={"common_data.rf_subject":80,"common_data.status":"\u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439","$or":[{"common_data.hidden":{"$exists":false}},{"common_data.hidden":{"$in":[0,false]}}]}&sort={"common_data.address":1}&page=1&start=0',
+							{
+								credentials: "same-origin"
+							}
+						)
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
+								}
+								response.json().then(function(data) {
+									newMfcList = [];
+									data.items.forEach(function(item, i, arr) {
+										newMfcList[i] = item.common_data;
+										newMfcList[i].is_favorite =
+											app.favoriteList && app.favoriteList[item._id] == true;
+										newMfcList[i].id = item._id;
+										newMfcList[i].mouType = "mfc";
+										if (
+											newMfcList[i].address.split(",")[1] ===
+											" обл. Челябинская"
+										) {
+											newMfcList[i].shortAddress = newMfcList[i].address
+												.split(",")
+												.slice(2)
+												.join(",");
+										}
+									});
+									app.mfcList = newMfcList;
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
+					},
+					getDictionarySubjectName: function() {
+						fetch(
+							"https://моидокументы.рф/mfc/ws/dictionary/dictionary_division_population/list/filter",
+							{
+								credentials: "same-origin",
+								method: "post",
+								headers: {
+									"Content-type": "application/json;charset=UTF-8"
+								},
+								body: '{disableAccessCheck: true, fields:["rf_subject_name"]}'
+							}
+						)
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
+								}
+								response.json().then(function(data) {
+									var dictionarySubjectName = {};
+									data.map(function(item) {
+										dictionarySubjectName[item._id] = item.rf_subject_name;
+									});
+									app.dictionarySubjectName = dictionarySubjectName;
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
+					},
+					getMfcCard: function(id) {
+						app.cardData = null;
+						fetch("https://моидокументы.рф/mfc/ws/cards/mfc/getSingle/" + id, {
+							credentials: "same-origin"
+						})
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
+								}
+								response.json().then(function(data) {
+									app.cardData = data;
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
+					},
+					getUrmCard: function(id) {
+						app.cardData = null;
+						fetch("https://моидокументы.рф/mfc/ws/cards/urm/getSingle/" + id, {
+							credentials: "same-origin"
+						})
+							.then(response => {
+								if (!response.ok) {
+									throw new Error("Network response was not ok");
+								}
+								response.json().then(function(data) {
+									app.cardData = data;
+								});
+							})
+							.catch(error => {
+								throw new Error(error);
+							});
 					}
-					app.login(username, password);
 				},
-				logout: function() {
-					//localStorage.clear();
-					localStorage.removeItem('rememberLogin');
-					localStorage.removeItem('username');
-					localStorage.removeItem('password');
-					fetch('https://моидокументы.рф/mfc/ws/auth/logout', {
-						credentials: "same-origin"
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								app.currentUser = false;
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
+				mixins: [commonMethods],
+				created: function() {
+					this.updateLogin();
+					this.getDictionarySubjectName();
+					updateInterval = window.setInterval("app.updateLogin()", 300000);
 				},
-				getUrmList: function() {
-					var newUrmList = null;
-					fetch('https://моидокументы.рф/mfc/ws/dictionary/unicombo/?collection=amm_sys_urm_card_form&fields=["_id","common_data.address","common_data.full_name","common_data.status","common_data.profile","common_data.wnd_count","common_data.start_date","common_data.finish_date"]&additionalFilter={"common_data.rf_subject":80,"common_data.status":"\u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439","$or":[{"common_data.hidden":{"$exists":false}},{"common_data.hidden":{"$in":[0,false]}}]}&sort={"common_data.address":1}&page=1&start=0', {
-						credentials: "same-origin"
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								newUrmList = [];
-								data.items.forEach(function(item, i, arr) {
-									newUrmList[i] = item.common_data;
-									newUrmList[i].is_favorite = app.favoriteList && app.favoriteList[item._id] == true;
-									newUrmList[i].id = item._id;
-									newUrmList[i].mouType = 'urm';
-									if (newUrmList[i].address.split(',')[1] === ' обл. Челябинская') {
-										newUrmList[i].shortAddress = newUrmList[i].address.split(',').slice(2).join(',');
-									}
-									if (newUrmList[i].full_name.indexOf('Челябинская область ') === 0) {
-										newUrmList[i].shortName = newUrmList[i].full_name.substr(20).split(' муниципального района ').join(' района ');
-									}
-								});
-								app.urmList = newUrmList;
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
-				},
-				getMfcList: function() {
-					var newMfcList = null;
-						fetch('https://моидокументы.рф/mfc/ws/dictionary/unicombo/?collection=amm_sys_mfc_card_form&fields=["_id","common_data.address","common_data.full_name","common_data.status","common_data.profile","common_data.wnd_count","common_data.start_date","common_data.finish_date"]&additionalFilter={"common_data.rf_subject":80,"common_data.status":"\u0434\u0435\u0439\u0441\u0442\u0432\u0443\u044e\u0449\u0438\u0439","$or":[{"common_data.hidden":{"$exists":false}},{"common_data.hidden":{"$in":[0,false]}}]}&sort={"common_data.address":1}&page=1&start=0', {
-						credentials: "same-origin"
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								newMfcList = [];
-								data.items.forEach(function(item, i, arr) {
-									newMfcList[i] = item.common_data;
-									newMfcList[i].is_favorite = app.favoriteList && app.favoriteList[item._id] == true;
-									newMfcList[i].id = item._id;
-									newMfcList[i].mouType = 'mfc';
-									if (newMfcList[i].address.split(',')[1] === ' обл. Челябинская') {
-										newMfcList[i].shortAddress = newMfcList[i].address.split(',').slice(2).join(',');
-									}
-								});
-								app.mfcList = newMfcList;
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
-				},
-				getDictionarySubjectName: function() {
-					fetch('https://моидокументы.рф/mfc/ws/dictionary/dictionary_division_population/list/filter', {
-						credentials: "same-origin",
-						method: 'post',
-						headers: {
-							"Content-type": "application/json;charset=UTF-8"
-						},
-						body: '{disableAccessCheck: true, fields:["rf_subject_name"]}'
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								var dictionarySubjectName = {};
-								data.map(function(item){
-									dictionarySubjectName[item._id] = item.rf_subject_name;
-								})
-								app.dictionarySubjectName = dictionarySubjectName;
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
-				},
-				getMfcCard: function(id) {
-					app.cardData = null;
-					fetch('https://моидокументы.рф/mfc/ws/cards/mfc/getSingle/' + id, {
-						credentials: "same-origin"
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								app.cardData = data;
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
-				},
-				getUrmCard: function(id) {
-					app.cardData = null;
-					fetch('https://моидокументы.рф/mfc/ws/cards/urm/getSingle/' + id, {
-						credentials: "same-origin"
-					})
-						.then((response) => {
-							if(!response.ok) {
-								throw new Error('Network response was not ok');
-							}
-							response.json().then(function(data) {
-								app.cardData = data;
-							});
-						})
-						.catch((error) => {
-							throw new Error(error);
-						});
-				},
-			},
-			mixins: [
-				commonMethods
-			],
-			created: function() {
-				this.updateLogin();
-				this.getDictionarySubjectName();
-				updateInterval = window.setInterval('app.updateLogin()', 300000);
-			},
-			components: {
-				'login': httpVueLoader('vue/login.vue')
-			}
-		});
-	</script>
-</body>
+				components: {
+					login: httpVueLoader("vue/login.vue")
+				}
+			});
+		</script>
+	</body>
 </html>

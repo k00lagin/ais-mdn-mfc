@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<at-tabs type="card" v-model="activeTab" size="small">
-			<at-tab-pane label="Общие данные" name="name1">
+			<at-tab-pane label="Общие данные" name="name1" v-if="cardData.common_data">
 				<template>
 					<div class="cardElement" v-for="field in cardFields" style="font-size:11px;">
 						<h2 v-if="field.type == 'subheading'">{{ field.label }}</h2>
@@ -12,7 +12,7 @@
 							</select>
 						</template>
 						<template v-else-if="field.type == 'schedule'">
-							<schedule :schedule="cardData.common_data[field.field]"></schedule>	
+							<schedule :schedule="cardData.common_data[field.field]"></schedule>
 						</template>
 						<template v-else>
 							<label :for="field.field">{{ field.label }}</label><input :type="field.type || 'text'" :value="cardData.common_data[field.field]" v-on:input="cardData.common_data[field.field] = $event.target.value">
@@ -20,20 +20,23 @@
 					</div>
 				</template>
 			</at-tab-pane>
-			<at-tab-pane label="АИС МФЦ" name="name2">
+			<at-tab-pane label="АИС МФЦ" name="name2" v-if="cardData.ais">
 				<ais-mfc :mou-type="mouType" :mou-id="mouId" :card-data="cardData"></ais-mfc>
 			</at-tab-pane>
-			<at-tab-pane label="Комфортность и доступность" name="name3">
+			<at-tab-pane label="Комфортность и доступность" name="name3" v-if="cardData.mfc_comfort">
 				<mfc-comfort :mou-type="mouType" :mou-id="mouId" :card-data="cardData"></mfc-comfort>
 			</at-tab-pane>
-			<at-tab-pane label="IT-инфраструктура МФЦ" name="name4">
+			<at-tab-pane label="IT-инфраструктура МФЦ" name="name4" v-if="cardData.mfc_it_infrastructure844">
 				<p>Тут будет про IT-инфраструктуру</p>
 			</at-tab-pane>
-			<at-tab-pane label="Бренд МФЦ" name="name5">
+			<at-tab-pane label="Бренд МФЦ" name="name5" v-if="cardData.mfc_brand">
 				<p>Тут будет про Бренд</p>
 			</at-tab-pane>
+			<at-tab-pane label="Дополнительные услуги" name="name6" v-if="cardData.services_extra">
+				<extra-services :mou-type="mouType" :mou-id="mouId" :card-data="cardData"></extra-services>
+			</at-tab-pane>
 		</at-tabs>
-	</div>	
+	</div>
 </template>
 <script>
 	module.exports = {
@@ -41,6 +44,7 @@
 			'schedule': httpVueLoader('vue/schedule.vue'),
 			'ais-mfc': httpVueLoader('vue/ais-mfc.vue'),
 			'mfc-comfort': httpVueLoader('vue/mfc-comfort.vue'),
+			'extra-services': httpVueLoader('vue/extra-services.vue'),
 		},
 		data: function() {
 			return({
@@ -257,5 +261,5 @@
 				});
 			},
 		},
-	};	
+	};
 </script>
