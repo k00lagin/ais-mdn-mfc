@@ -238,191 +238,6 @@
 					"fill-templates": httpVueLoader("vue/fill-templates.vue")
 				}
 			});
-			var templateView = Vue.component("template-view", {
-				template: "#template-view",
-				mixins: [commonMethods],
-				components: {
-					"upload-template": httpVueLoader("vue/upload-template.vue")
-				},
-				props: {
-					list: String,
-					columns: String
-					//isFavoriteOnly: Boolean,
-					//favoriteList: Array,
-				},
-				data: function() {
-					return {
-						searchQuery: "",
-						month: null,
-						year: null
-					};
-				},
-				computed: {
-					gridColumns: function() {
-						return app[this.columns];
-					},
-					gridData: function() {
-						return app[this.list];
-					},
-					favoriteList: function() {
-						return app.favoriteList;
-					},
-					dictionarySubjectName: function() {
-						return app.dictionarySubjectName;
-					},
-					isFavoriteOnly: {
-						get: function() {
-							return app.isFavoriteOnly;
-						},
-						set: function(newValue) {
-							app.isFavoriteOnly = newValue;
-						}
-					}
-				},
-				methods: {
-					handleIsFavoriteOnlyChange: function(e) {
-						localStorage.setItem("isFavoriteOnly", e.currentTarget.value);
-					},
-					handleFileSelect: function(e) {
-						document.getElementById("uploadFilename").value =
-							e.target.files[0].name;
-						this.uploadTemplate();
-					},
-					uploadTemplate: function() {
-						let form = document.getElementById("uploadTemplate");
-						this.sendMultiformData(
-							"https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData",
-							form
-						);
-					}
-				},
-				mounted: function() {
-					this.month = new Date().getMonth() || 12;
-					if (this.month == 12) {
-						this.year = new Date().getFullYear() - 1;
-					} else {
-						this.year = new Date().getFullYear();
-					}
-				},
-				created: function() {
-					if (!app.mfcList) {
-						app.getMfcList();
-					}
-					if (!app.urmList) {
-						app.getUrmList();
-					}
-				},
-				methods: {
-					handleFileSelect: function(e) {
-						document.getElementById("uploadFilename").value =
-							e.target.files[0].name;
-						this.uploadTemplate();
-					},
-					uploadTemplate: function() {
-						let form = document.getElementById("uploadTemplate");
-						this.sendMultiformData(
-							"https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/uploadData",
-							form
-						);
-					}
-				},
-				mounted: function() {
-					this.month = new Date().getMonth() || 12;
-					if (this.month == 12) {
-						this.year = new Date().getFullYear() - 1;
-					} else {
-						this.year = new Date().getFullYear();
-					}
-				},
-				created: function() {
-					if (!app.mfcList) {
-						app.getMfcList();
-					}
-					if (!app.urmList) {
-						app.getUrmList();
-					}
-				}
-			});
-			var commonDataView = Vue.component("common_data-view", {
-				template: "#common_data-view",
-				mixins: [commonMethods],
-				props: {
-					list: String,
-					columns: String
-				},
-				data: function() {
-					return {
-						searchQuery: ""
-					};
-				},
-				computed: {
-					gridColumns: function() {
-						return app[this.columns];
-					},
-					gridData: function() {
-						return app[this.list];
-					},
-					favoriteList: function() {
-						return app.favoriteList;
-					},
-					dictionarySubjectName: function() {
-						return app.dictionarySubjectName;
-					},
-					isFavoriteOnly: {
-						get: function() {
-							return app.isFavoriteOnly;
-						},
-						data: function() {
-							return {
-								searchQuery: ""
-							};
-						},
-						computed: {
-							gridColumns: function() {
-								return app[this.columns];
-							},
-							gridData: function() {
-								return app[this.list];
-							},
-							favoriteList: function() {
-								return app.favoriteList;
-							},
-							dictionarySubjectName: function() {
-								return app.dictionarySubjectName;
-							},
-							isFavoriteOnly: {
-								get: function() {
-									return app.isFavoriteOnly;
-								},
-								set: function(newValue) {
-									app.isFavoriteOnly = newValue;
-								}
-							}
-						},
-						methods: {
-							handleIsFavoriteOnlyChange: function(e) {
-								localStorage.setItem("isFavoriteOnly", e.currentTarget.value);
-							}
-						},
-						created: function() {
-							if (!app.mfcList) {
-								app.getMfcList();
-							}
-							if (!app.urmList) {
-								app.getUrmList();
-							}
-						}
-					}
-				},
-				created: function() {
-					if (!app.mfcList) {
-						app.getMfcList();
-					}
-					if (!app.urmList) {
-						app.getUrmList();
-					}
-				}
-			});
 			//var PartialMatchFilterComponent = require('PartialMatchFilterComponent');
 			//страничка со всеми МФЦ https://моидокументы.рф/mfc/ws/cards/urm/getListWithProjection?query={%22common_data.status%22%3A%22%D0%B4%D0%B5%D0%B9%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9%22%2C%22common_data.rf_subject%22%3A80}&projection=common_data&page=1&start=0&limit=20
 			// инфа о конкретном МФЦ https://моидокументы.рф/mfc/ws/card/amm_sys_urm_card_form/common_data?_dc=1507099217843&id=10673
@@ -500,71 +315,6 @@
 			  </tbody>
 			</table>
 		</script>
-		<script type="text/x-template" id="template-view">
-			<div>
-				<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-					<at-checkbox v-model="isFavoriteOnly" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
-					<div style="width: 200px; display: inline-block;"><at-input v-model="searchQuery" size="small">
-						<template slot="prepend">
-							<i class="icon icon-filter"></i>
-						</template>
-					</at-input></div>
-					<div style="width: 100px; display: inline-block;">
-						<at-select name="month"  v-model="month" size="small">
-							<at-option :value="1">Январь</at-option>
-							<at-option :value="2">Февраль</at-option>
-							<at-option :value="3">Март</at-option>
-							<at-option :value="4">Апрель</at-option>
-							<at-option :value="5">Май</at-option>
-							<at-option :value="6">Июнь</at-option>
-							<at-option :value="7">Июль</at-option>
-							<at-option :value="8">Август</at-option>
-							<at-option :value="9">Сентябрь</at-option>
-							<at-option :value="10">Октябрь</at-option>
-							<at-option :value="11">Ноябрь</at-option>
-							<at-option :value="12">Декабрь</at-option>
-						</at-select>
-					</div>
-					<div style="width: 80px; display: inline-block;">
-						<at-input v-model="year" size="small"></at-input>
-					</div>
-					<div class="spacer"></div>
-					<upload-template></upload-template>
-				</div>
-
-				<template-grid
-					:data="gridData"
-					:columns="gridColumns"
-					:filter-key="searchQuery"
-					:is-favorite-only="isFavoriteOnly"
-					:favorite-list="favoriteList"
-					:mou-type="$route.path == '/mfc_template_list' ? 'mfc' : 'urm'"
-					:year="year"
-					:month="month">
-				</template-grid>
-			</div>
-		</script>
-		<script type="text/x-template" id="common_data-view">
-			<div>
-				<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-					<at-checkbox v-model="isFavoriteOnly" label="Только избранное" style="padding-right: 8px;padding-left: 8px;align-self: center;">Только избранное</at-checkbox>
-					<div style="width: 200px; display: inline-block;">
-						<at-input v-model="searchQuery" size="small">
-							<template slot="prepend">
-								<i class="icon icon-filter"></i>
-							</template>
-						</at-input>
-					</div>
-				</div>
-				<template-grid
-					:data="gridData"
-					:columns="gridColumns"
-					:filter-key="searchQuery"
-					:is-favorite-only="isFavoriteOnly"
-					:favorite-list="favoriteList">
-				</template-grid>
-			</div>
-		</script>
 		<div id="app">
 			<header v-if="currentUser">
 				<div class="spacer"></div>
@@ -606,12 +356,12 @@
 			const routes = [
 				{
 					path: "/mfc_template_list",
-					component: templateView,
+					component: httpVueLoader("vue/mfc-list.vue"),
 					props: { list: "mfcList", columns: "templateListColumns" }
 				},
 				{
 					path: "/urm_template_list",
-					component: templateView,
+					component: httpVueLoader("vue/mfc-list.vue"),
 					props: { list: "urmList", columns: "templateListColumns" }
 				},
 				{
@@ -620,12 +370,12 @@
 				},
 				{
 					path: "/mfc_common_data",
-					component: commonDataView,
+					component: httpVueLoader("vue/mfc-list.vue"),
 					props: { list: "mfcList", columns: "commonDataColumns" }
 				},
 				{
 					path: "/urm_common_data",
-					component: commonDataView,
+					component: httpVueLoader("vue/mfc-list.vue"),
 					props: { list: "urmList", columns: "commonDataColumns" }
 				},
 				{
