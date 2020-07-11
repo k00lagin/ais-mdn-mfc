@@ -1,6 +1,6 @@
 (function umd(root,factory){
 	if(typeof module==='object' && typeof exports === 'object' )
-		module.export=factory()
+		module.exports=factory()
 	else if(typeof define==='function' && define.amd)
 		define([],factory)
 	else
@@ -170,7 +170,12 @@
 				throw new (ex.constructor)(ex.message, url, lineNumber);
 			}
 
-			return Promise.resolve(this.module.exports);
+			return Promise.resolve(this.module.exports)
+			.then(httpVueLoader.scriptExportsHandler.bind(this))
+			.then(function(exports) {
+
+				this.module.exports = exports;
+			}.bind(this));
 		}
 	};
 
@@ -293,10 +298,10 @@
 
 					var lang = eltCx.elt.getAttribute('lang');
 					eltCx.elt.removeAttribute('lang');
-					return httpVueLoader.langProcessor[lang.toLowerCase()](content === null ? eltCx.getContent() : content);
+					return httpVueLoader.langProcessor[lang.toLowerCase()].call(this, content === null ? eltCx.getContent() : content);
 				}
 				return content;
-			})
+			}.bind(this))
 			.then(function(content) {
 
 				if ( content !== null )
@@ -438,6 +443,7 @@
 
 			var xhr = new XMLHttpRequest();
 			xhr.open('GET', url);
+            		xhr.responseType = 'text';
 
 			xhr.onreadystatechange = function() {
 
@@ -459,6 +465,8 @@
 		js: identity,
 		css: identity
 	};
+
+	httpVueLoader.scriptExportsHandler = identity;
 
 	function httpVueLoader(url, name) {
 
