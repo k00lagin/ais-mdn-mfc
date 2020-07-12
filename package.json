@@ -1,21 +1,19 @@
 {
-  "main": "app/index.html",
   "name": "mrsmfc",
-  "description": "monitoring",
-  "version": "0.9.3",
-  "keywords": [ "monitoring" ],
-  "window": {
-    "title": "Мониторинг развития сети МФЦ",
-    "icon": "app/images/icon.png",
-    "toolbar": true,
-    "frame": true,
-    "width": 800,
-    "height": 500,
-    "position": "center",
-    "min_width": 800,
-    "min_height": 500
+  "version": "0.10.0",
+  "description": "Альтернативный фронтенд к АИС МРС МФЦ",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
   },
-  "webkit": {
-    "plugin": true
+  "repository": "https://github.com/electron/electron-quick-start",
+  "keywords": [
+    "monitoring"
+  ],
+  "author": "Vsevolod Kulagin <k00lagin>",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^9.1.0",
+    "electron-devtools-installer": "^3.1.0"
   }
 }

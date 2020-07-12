@@ -7,3 +7,4 @@ swiftshader
 *.pak
 *.dat
 *.bin
+node_modules

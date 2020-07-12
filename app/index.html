@@ -6,6 +6,7 @@
 		<link rel="stylesheet" href="css/at.min.css" />
 		<script src="js/vue.js"></script>
 		<script src="js/vue-router.js"></script>
+		<script src="js/vuex.js"></script>
 		<link rel="stylesheet" href="css/style.css" />
 		<script src="js/at.min.js"></script>
 		<script src="js/httpVueLoader.js"></script>
@@ -15,18 +16,20 @@
 
 	<body>
 		<script>
-			chrome.passwordsPrivate.getSavedPasswordList(function(passwords) {
-				passwords.forEach((p, i) => {
-					chrome.passwordsPrivate.removeSavedPassword(i);
-				});
+			const store = new Vuex.Store({
+				state: {
+					showFavoritesOnly: false
+				},
+				mutations: {
+					loadShowFavoritesOnly (state) {
+						state.showFavoritesOnly = localStorage.getItem("showFavoritesOnly", "false") === "true";
+					},
+					toggleFavorites (state) {
+						localStorage.setItem("showFavoritesOnly", !state.showFavoritesOnly);
+						state.showFavoritesOnly = localStorage.getItem("showFavoritesOnly", "false") === "true";
+					},
+				}
 			});
-			chrome.privacy.services.passwordSavingEnabled.set({ value: false });
-			var ngui = require("nw.gui");
-			var nwin = ngui.Window.get();
-			onload = function() {
-				nwin.show();
-				nwin.maximize();
-			};
 			var commonMethods = {
 				methods: {
 					fetchData: function(url, object, paramName) {
@@ -74,7 +77,6 @@
 						});
 					},
 					fetchAndSave: function(url, path) {
-						console.log(url, path);
 						fetch(url, {
 							credentials: "same-origin"
 						})
@@ -82,10 +84,18 @@
 								if (!response.ok) {
 									throw new Error("Network response was not ok");
 								}
+								//console.log(response.arrayBuffer());
 								return response.arrayBuffer();
 							})
 							.then(function(buffer) {
-								fs.writeFile(path, Buffer(new Uint8Array(buffer)));
+								//fs.writeFile(path, Buffer(new Uint8Array(buffer)));
+								fs.writeFile(path, Buffer.from(buffer), function(err) {
+									if(err) {
+										console.log(err);
+									} else {
+										console.log("The file was saved!");
+									}
+								});
 							})
 							.catch(error => {
 								throw new Error(error);
@@ -123,121 +133,6 @@
 					}
 				}
 			};
-			var templateGrid = Vue.component("template-grid", {
-				template: "#template-grid-template",
-				mixins: [commonMethods],
-				props: {
-					data: Array,
-					columns: Array,
-					favoriteList: Object,
-					filterKey: String,
-					isFavoriteOnly: Boolean,
-					year: Number,
-					month: Number,
-					mouType: String
-				},
-				data: function() {
-					var sortOrders = {};
-					this.columns.forEach(function(key) {
-						sortOrders[key.field] = 1;
-					});
-					return {
-						sortKey: "",
-						sortOrders: sortOrders
-					};
-				},
-				computed: {
-					dictionarySubjectName: function() {
-						return app.dictionarySubjectName;
-					},
-					filteredData: function() {
-						var sortKey = this.sortKey;
-						var filterKey = this.filterKey && this.filterKey.toLowerCase();
-						var isFavoriteOnly = this.isFavoriteOnly;
-						var favoriteList = this.favoriteList;
-						var order = this.sortOrders[sortKey] || 1;
-						var data = this.data;
-						if (data) {
-							if (isFavoriteOnly) {
-								data = data.filter(function(item) {
-									return favoriteList && favoriteList[item.id] == true;
-								});
-							}
-							if (filterKey) {
-								data = data.filter(function(row) {
-									return Object.keys(row).some(function(key) {
-										return (
-											String(row[key])
-												.toLowerCase()
-												.indexOf(filterKey) > -1
-										);
-									});
-								});
-							}
-							if (!isFavoriteOnly) {
-								var favoriteData = data.filter(function(item) {
-									return favoriteList && favoriteList[item.id] == true;
-								});
-								var nonFavoriteData = data.filter(function(item) {
-									return favoriteList && favoriteList[item.id] != true;
-								});
-								if (sortKey) {
-									var favoriteData = favoriteData.sort(function(a, b) {
-										a = a[sortKey];
-										b = b[sortKey];
-										return (a === b ? 0 : a > b ? 1 : -1) * order;
-									});
-									nonFavoriteData = nonFavoriteData.sort(function(a, b) {
-										a = a[sortKey];
-										b = b[sortKey];
-										return (a === b ? 0 : a > b ? 1 : -1) * order;
-									});
-								}
-								data = favoriteData.concat(nonFavoriteData);
-							} else {
-								if (sortKey) {
-									data = data.sort(function(a, b) {
-										a = a[sortKey];
-										b = b[sortKey];
-										return (a === b ? 0 : a > b ? 1 : -1) * order;
-									});
-								}
-							}
-						}
-						return data;
-					}
-				},
-				filters: {
-					capitalize: function(str) {
-						return str.charAt(0).toUpperCase() + str.slice(1);
-					}
-				},
-				methods: {
-					sortBy: function(key) {
-						this.sortKey = key;
-						this.sortOrders[key] = this.sortOrders[key] * -1;
-					},
-					handleFavoriteClick: function(e) {
-						var id = e.target.parentNode.parentNode.parentNode.id;
-						var newValue = app.favoriteList;
-						if (e.target.checked) {
-							newValue[id] = e.target.checked;
-						} else {
-							delete newValue[id];
-						}
-						app.favoriteList = newValue;
-					}
-				},
-				created: function() {
-					//console.log('COLUMNS IN GRID - ' + this.columns);
-				},
-				components: {
-					"download-template-label": httpVueLoader(
-						"vue/download-template-label.vue"
-					),
-					"fill-templates": httpVueLoader("vue/fill-templates.vue")
-				}
-			});
 			//var PartialMatchFilterComponent = require('PartialMatchFilterComponent');
 			//страничка со всеми МФЦ https://моидокументы.рф/mfc/ws/cards/urm/getListWithProjection?query={%22common_data.status%22%3A%22%D0%B4%D0%B5%D0%B9%D1%81%D1%82%D0%B2%D1%83%D1%8E%D1%89%D0%B8%D0%B9%22%2C%22common_data.rf_subject%22%3A80}&projection=common_data&page=1&start=0&limit=20
 			// инфа о конкретном МФЦ https://моидокументы.рф/mfc/ws/card/amm_sys_urm_card_form/common_data?_dc=1507099217843&id=10673
@@ -248,72 +143,6 @@
 					<label :for="field.field">{{ field.label + ' ' + currentUser[field.field] }}</label><br>
 				</div>
 			</div>
-		</script>
-		<script type="text/x-template" id="template-grid-template">
-			<table :class="{ 'favorite-only' : isFavoriteOnly }">
-			  <thead>
-			    <tr>
-			      <th v-for="(key, index) in columns"
-			      	@click="!key.noSort ? sortBy(key.field) : ''"
-			      	:class="'column__' + key.field + ' ' + { active: sortKey == key.field }">
-			      	{{ key.label }}
-			      	<span v-if="!key.noSort && sortKey == key.field" class="arrow" :class="sortOrders[key.field] > 0 ? 'asc' : 'dsc'">
-			      	</span>
-			      </th>
-			    </tr>
-			  </thead>
-			  <tbody>
-			    <tr v-for="entry in filteredData" :id="entry.id">
-			      <td v-for="key in columns" :class="'column__' + key.field">
-			        <label v-if="key.label == ' '" class="is_favorite">
-			          <input type="checkbox" @change="handleFavoriteClick" :checked="favoriteList[entry.id] == true">
-			          <div></div>
-			        </label>
-			        <div v-else-if="key.label == 'Шаблоны'" style="display:flex;">
-							<label tabindex="0" title="Федеральные услуги" class="templateDownloadLabel">
-								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="federal"></download-template-label>
-								<input style="display: none;" type="file" :nwsaveas="'ФОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=federal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
-							</label>
-							<template v-if="$route.path == '/mfc_template_list'">
-								<label tabindex="0" title="Региональные услуги" class="templateDownloadLabel">
-									<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="regional"></download-template-label>
-									<input style="display: none;" type="file" :nwsaveas="'РОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=regional&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
-								</label>
-								<label tabindex="0" title="Муниципальные услуги" class="templateDownloadLabel">
-									<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="municipal"></download-template-label>
-									<input style="display: none;" type="file" :nwsaveas="'МОИВ ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=municipal&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
-								</label>
-							</template>
-							<label tabindex="0" title="Услуги иных организаций" class="templateDownloadLabel">
-								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="otherServices"></download-template-label>
-								<input style="display: none;" type="file" :nwsaveas="'Иные услуги ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=otherServices&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
-							</label>
-
-							<label tabindex="0" title="Окна и сотрудники" class="templateDownloadLabel">
-								<download-template-label v-if="isFavoriteOnly" :year="Number(year)" :month="Number(month)" :mouType="mouType" :mouId="entry.id" templateType="windowsAndEmployee"></download-template-label>
-								<input style="display: none;" type="file" :nwsaveas="'Окна и сотрудники ' + entry.full_name + '.xls'" :url="'https://xn--d1achjhdicc8bh4h.xn--p1ai/mfc/ws/quarterDataExcel/templateMou/' + entry[key.field] + '?year=' + year + '&month=' + month + '&serviceType=windowsAndEmployee&mouType=' + mouType + '&subjectId=80'" onchange="app.fetchAndSave(this.getAttribute('url'), this.value); this.value='';" />
-							</label>
-			      	</div>
-			      	<template v-else-if="key.field == 'urban_area' || key.field == 'urban_district'">
-			      		{{ dictionarySubjectName[entry[key.field]] }}
-			      	</template>
-				<template v-else-if="key.field == 'address'">
-					{{ entry['shortAddress'] || entry['address'] }}
-				</template>
-				<template v-else-if="key.field == 'full_name'">
-					<router-link v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'" :to="'/quarter_data_import/' + entry.mouType + '/' + entry.id + '/' + year + '/' + month" class="textBtn">{{ entry['shortName'] || entry[key.field] }}</router-link>
-					<router-link v-if="$route.path == '/mfc_common_data' || $route.path == '/urm_common_data'" :to="'/common_data/' + entry.mouType + '/' + entry.id" class="textBtn">{{ entry['shortName'] || entry[key.field] }}</router-link>
-				</template>
-				<template v-else-if="key.field == 'start_date'">
-					{{ entry[key.field] | date }}
-				</template>
-				<span v-else="">
-					{{ entry[key.field] }}
-				</span>
-			</td>
-			    </tr>
-			  </tbody>
-			</table>
 		</script>
 		<div id="app">
 			<header v-if="currentUser">
@@ -422,9 +251,13 @@
 					time
 				);
 			});
+			let { app } = require('electron').remote;
+			const electronApp = app;
+			const { dialog } = require('electron').remote;
 			const fs = require("fs");
-			var app = new Vue({
+			app = new Vue({
 				router,
+				store,
 				el: "#app",
 				data: {
 					currentUser: null,
@@ -433,7 +266,6 @@
 					mfcList: null,
 					urmList: null,
 					gridColumns: null,
-					isFavoriteOnly: null,
 					dictionarySubjectName: null,
 					searchQuery: "",
 
@@ -502,7 +334,7 @@
 				computed: {
 					// build https://api.github.com/repos/k00lagin/ais-mdn-mfc/commits
 					version: function() {
-						return nw.App.manifest.version;
+						return electronApp.getVersion();
 					},
 					favoriteList: {
 						get: function() {
@@ -514,13 +346,8 @@
 					}
 				},
 				mounted: function() {
-					this.isFavoriteOnly =
-						localStorage.getItem("isFavoriteOnly") == "true";
-				},
-				watch: {
-					isFavoriteOnly: function(value) {
-						localStorage.isFavoriteOnly = value;
-					}
+					// this.$store.commit('loadShowFavoritesOnly');
+					store.commit('loadShowFavoritesOnly');
 				},
 				methods: {
 					login: function(username, password) {
@@ -676,6 +503,17 @@
 												.split(",")
 												.slice(2)
 												.join(",");
+										}
+										if (
+											newMfcList[i].full_name.indexOf(
+												"Челябинской области"
+											) >= 0
+										) {
+											newMfcList[i].shortName = newMfcList[i].full_name
+												.replace(' Челябинской области МФЦ', '')
+												.replace(' Челябинской области "МФЦ"', '')
+												.replace(" муниципального района", " района")
+												.replace(newMfcList[i].full_name.match(/[А-Я][А-Я]?([А-Я])/)[0], newMfcList[i].full_name.match(/[А-Я][А-Я]?([А-Я])/)[0] + " МФЦ");
 										}
 									});
 									app.mfcList = newMfcList;

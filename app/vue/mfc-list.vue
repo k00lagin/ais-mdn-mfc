@@ -3,7 +3,8 @@ module.exports = {
 	template: "#template-view",
 	mixins: [commonMethods],
 	components: {
-		"upload-template": httpVueLoader("./upload-template.vue")
+		"upload-template": httpVueLoader("./upload-template.vue"),
+		"template-grid": httpVueLoader("./template-grid.vue")
 	},
 	props: {
 		list: String,
@@ -17,8 +18,8 @@ module.exports = {
 		};
 	},
 	methods: {
-		handleIsFavoriteOnlyChange: function(e) {
-			localStorage.setItem("isFavoriteOnly", e.currentTarget.value);
+		toggleFavorites: function(e) {
+			this.$store.commit('toggleFavorites');
 		},
 		handleFileSelect: function(e) {
 			document.getElementById("uploadFilename").value = e.target.files[0].name;
@@ -45,13 +46,8 @@ module.exports = {
 		dictionarySubjectName: function() {
 			return app.dictionarySubjectName;
 		},
-		isFavoriteOnly: {
-			get: function() {
-				return app.isFavoriteOnly;
-			},
-			set: function(newValue) {
-				app.isFavoriteOnly = newValue;
-			}
+		showFavoritesOnly: function() {
+			return this.$store.state.showFavoritesOnly;
 		}
 	},
 	mounted: function() {
@@ -77,11 +73,11 @@ module.exports = {
 	<div>
 		<div v-if="this.columns === 'templateListColumns'">
 			<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-				<at-checkbox
-					v-model="isFavoriteOnly"
-					label="Только избранное"
-					style="padding-right: 8px;padding-left: 8px;align-self: center;"
-				>Только избранное</at-checkbox>
+				<label class="at-checkbox__label" style="padding-right: 8px;padding-left: 8px;align-self: center;">
+					<span class="at-checkbox__input"></span>
+					<input type="checkbox" v-bind:checked="showFavoritesOnly"	@change="toggleFavorites">
+					Только избранное
+				</label>
 				<div style="width: 200px; display: inline-block;">
 					<at-input v-model="searchQuery" size="small">
 						<template slot="prepend">
@@ -116,8 +112,8 @@ module.exports = {
 				:data="gridData"
 				:columns="gridColumns"
 				:filter-key="searchQuery"
-				:is-favorite-only="isFavoriteOnly"
 				:favorite-list="favoriteList"
+				:show-favorites-only="showFavoritesOnly"
 				:mou-type="$route.path == '/mfc_template_list' ? 'mfc' : 'urm'"
 				:year="year"
 				:month="month"
@@ -125,11 +121,11 @@ module.exports = {
 		</div>
 		<div v-if="this.columns === 'commonDataColumns'">
 			<div id="toolPanel" style="padding:4px; display: flex; align-items: flex-end;">
-				<at-checkbox
-					v-model="isFavoriteOnly"
-					label="Только избранное"
-					style="padding-right: 8px;padding-left: 8px;align-self: center;"
-				>Только избранное</at-checkbox>
+				<label class="at-checkbox__label" style="padding-right: 8px;padding-left: 8px;align-self: center;">
+					<span class="at-checkbox__input"></span>
+					<input type="checkbox" v-bind:checked="showFavoritesOnly"	@change="toggleFavorites">
+					Только избранное
+				</label>
 				<div style="width: 200px; display: inline-block;">
 					<at-input v-model="searchQuery" size="small">
 						<template slot="prepend">
@@ -140,9 +136,9 @@ module.exports = {
 			</div>
 			<template-grid
 				:data="gridData"
+				:show-favorites-only="showFavoritesOnly"
 				:columns="gridColumns"
 				:filter-key="searchQuery"
-				:is-favorite-only="isFavoriteOnly"
 				:favorite-list="favoriteList"
 			></template-grid>
 		</div>
