@@ -139,7 +139,7 @@ module.exports = {
 		<tbody>
 			<tr v-for="entry in filteredData" :id="entry.id" v-bind:key="entry.id">
 				<td v-for="key in columns" :class="'column__' + key.field" v-bind:key="key.field">
-					<label v-if="key.label == ' '" class="is_favorite">
+					<label v-if="key.label == ' '" class="is_favorite" :title="favoriteList[entry.id] == true?'Удалить из избранного':'Добавить в избранное'">
 						<input
 							type="checkbox"
 							@change="handleFavoriteClick"
