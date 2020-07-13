@@ -9,7 +9,6 @@ module.exports = {
 		filterKey: String,
 		year: Number,
 		month: Number,
-		mouType: String,
 		showFavoritesOnly: Boolean
 	},
 	data: function() {
@@ -150,11 +149,11 @@ module.exports = {
 					</label>
 					<div v-else-if="key.label == 'Шаблоны' && showFavoritesOnly" style="display:flex;">
 						<download-template-button
-							v-for="type in mouType == 'mfc' ? ['federal','municipal','regional','otherServices','windowsAndEmployee'] : ['federal','otherServices','windowsAndEmployee']"
+							v-for="type in entry.mouType == 'mfc' ? ['federal','municipal','regional','otherServices','windowsAndEmployee'] : ['federal','otherServices','windowsAndEmployee']"
 							v-bind:key="type"
 							:year="Number(year)"
 							:month="Number(month)"
-							:mou-type="mouType"
+							:mou-type="entry.mouType"
 							:mou-id="entry.id"
 							:mou-name="entry.shortName || entry.full_name"
 							:template-type="type"
@@ -166,12 +165,12 @@ module.exports = {
 					<template v-else-if="key.field == 'address'">{{ entry['shortAddress'] || entry['address'] }}</template>
 					<template v-else-if="key.field == 'full_name'">
 						<router-link
-							v-if="$route.path == '/mfc_template_list' || $route.path == '/urm_template_list'"
+							v-if="$route.path == '/mou_template_list'"
 							:to="'/quarter_data_import/' + entry.mouType + '/' + entry.id + '/' + year + '/' + month"
 							class="textBtn"
 						>{{ (showFavoritesOnly && entry.mouType ==='urm' && entry['shortName']) ? entry['shortName'].replace(entry['shortName'].match(/[А-ЯЁ][А-ЯЁа-яё-]+ района/), '') : entry['shortName'] || entry[key.field] }}</router-link>
 						<router-link
-							v-if="$route.path == '/mfc_common_data' || $route.path == '/urm_common_data'"
+							v-if="$route.path == '/mou_common_data'"
 							:to="'/common_data/' + entry.mouType + '/' + entry.id"
 							class="textBtn"
 						>{{ (showFavoritesOnly && entry.mouType ==='urm' &&  entry['shortName']) ? entry['shortName'].replace(entry['shortName'].match(/[А-ЯЁ][А-ЯЁа-яё-]+ района/), '') : entry['shortName'] || entry[key.field] }}</router-link>

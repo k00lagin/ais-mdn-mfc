@@ -162,14 +162,14 @@
 			<div v-if="currentUser" class="main">
 				<div class="menu">
 					<at-menu mode="vertical" router="router">
-						<at-menu-item-group title="Шаблоны">
-							<at-menu-item to="/mfc_template_list">МФЦ</at-menu-item>
-							<at-menu-item to="/urm_template_list">ТОСП</at-menu-item>
-							<at-menu-item to="/fill_templates">Заполнение</at-menu-item>
+						<!-- <at-menu-item-group title=""> -->
+							<at-menu-item to="/mou_template_list">Шаблоны</at-menu-item>
+							<!-- <at-menu-item to="/urm_template_list">ТОСП</at-menu-item> -->
+							<!-- <at-menu-item to="/fill_templates">Заполнение</at-menu-item> -->
 						</at-menu-item-group>
-						<at-menu-item-group title="Подсистемы сбора информации">
-							<at-menu-item to="/mfc_common_data">МФЦ</at-menu-item>
-							<at-menu-item to="/urm_common_data">ТОСП</at-menu-item>
+						<!-- <at-menu-item-group title=""> -->
+							<at-menu-item to="/mou_common_data">Подсистемы сбора информации</at-menu-item>
+							<!-- <at-menu-item to="/urm_common_data">ТОСП</at-menu-item> -->
 						</at-menu-item-group>
 					</at-menu>
 					<span class="version">v:{{ version }}</span>
@@ -184,29 +184,29 @@
 		<script>
 			const routes = [
 				{
-					path: "/mfc_template_list",
+					path: "/mou_template_list",
 					component: httpVueLoader("vue/mfc-list.vue"),
-					props: { list: "mfcList", columns: "templateListColumns" }
+					props: { list: "mouList", columns: "templateListColumns" }
 				},
-				{
-					path: "/urm_template_list",
-					component: httpVueLoader("vue/mfc-list.vue"),
-					props: { list: "urmList", columns: "templateListColumns" }
-				},
+				// {
+				// 	path: "/urm_template_list",
+				// 	component: httpVueLoader("vue/mfc-list.vue"),
+				// 	props: { list: "urmList", columns: "templateListColumns" }
+				// },
 				{
 					path: "/fill_templates",
 					component: httpVueLoader("vue/fill-templates.vue")
 				},
 				{
-					path: "/mfc_common_data",
+					path: "/mou_common_data",
 					component: httpVueLoader("vue/mfc-list.vue"),
-					props: { list: "mfcList", columns: "commonDataColumns" }
+					props: { list: "mouList", columns: "commonDataColumns" }
 				},
-				{
-					path: "/urm_common_data",
-					component: httpVueLoader("vue/mfc-list.vue"),
-					props: { list: "urmList", columns: "commonDataColumns" }
-				},
+				// {
+				// 	path: "/urm_common_data",
+				// 	component: httpVueLoader("vue/mfc-list.vue"),
+				// 	props: { list: "urmList", columns: "commonDataColumns" }
+				// },
 				{
 					path: "/user_settings",
 					component: httpVueLoader("vue/user-settings.vue")
@@ -265,6 +265,7 @@
 					cardData: null,
 					mfcList: null,
 					urmList: null,
+					mouList: null,
 					gridColumns: null,
 					dictionarySubjectName: null,
 					searchQuery: "",
@@ -469,6 +470,7 @@
 										}
 									});
 									app.urmList = newUrmList;
+									app.mouList = [...(app.mfcList || []), ...newUrmList];
 								});
 							})
 							.catch(error => {
@@ -517,6 +519,7 @@
 										}
 									});
 									app.mfcList = newMfcList;
+									app.mouList = [...newMfcList, ...(app.urmList || [])];
 								});
 							})
 							.catch(error => {

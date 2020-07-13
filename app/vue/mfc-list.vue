@@ -114,7 +114,6 @@ module.exports = {
 				:filter-key="searchQuery"
 				:favorite-list="favoriteList"
 				:show-favorites-only="showFavoritesOnly"
-				:mou-type="$route.path == '/mfc_template_list' ? 'mfc' : 'urm'"
 				:year="year"
 				:month="month"
 			></template-grid>
