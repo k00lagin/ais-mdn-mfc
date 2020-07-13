@@ -3,8 +3,6 @@
 		v-bind:class="{ hasData: errors != null, 'at-tag--success': errors == 0, 'at-tag--error': errors > 0 }" >
 		{{ templateTypeLocale[templateType].substr(0, 1) }}
 	</button>
-	<!-- <at-tag v-if="errors == null">{{ templateTypeLocale[templateType] }}</at-tag>
-	<at-tag class="downloadTemplateLabel hasData" v-else :color="errors > 0?'error':'success'">{{ templateTypeLocale[templateType] }}</at-tag> -->
 </template>
 
 <script>
@@ -51,17 +49,25 @@
 			}
 		},
 		mounted: function() {
-			this.getData();
+			if (app.favoriteList[this.mouId] == true) {
+				this.getData();
+			}
 		},
 		watch: {
 			'$route' (to, from) {
-				this.getData();
+				if (app.favoriteList[this.mouId] == true) {
+					this.getData();
+				}
 			},
 			month: function() {
-				this.getData();
+				if (app.favoriteList[this.mouId] == true) {
+					this.getData();
+				}
 			},
 			year: function() {
-				this.getData();
+				if (app.favoriteList[this.mouId] == true) {
+					this.getData();
+				}
 			},
 			uploads: function () {
 				if (this.uploads && this.uploads.items && this.uploads.items[0] && this.uploads.items[0].uploadFile) {

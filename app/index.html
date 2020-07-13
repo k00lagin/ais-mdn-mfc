@@ -272,6 +272,11 @@
 
 					commonDataColumns: [
 						{
+							label: " ",
+							field: "is_favorite",
+							noSort: true
+						},
+						{
 							label: "Название",
 							field: "full_name"
 						},
@@ -287,13 +292,13 @@
 							label: "Окна",
 							field: "wnd_count"
 						},
+					],
+					templateListColumns: [
 						{
 							label: " ",
 							field: "is_favorite",
 							noSort: true
-						}
-					],
-					templateListColumns: [
+						},
 						{
 							label: "Название",
 							field: "full_name"
@@ -307,11 +312,7 @@
 							field: "id",
 							noSort: true
 						},
-						{
-							label: " ",
-							field: "is_favorite",
-							noSort: true
-						}
+
 					],
 					userSettings: [
 						{

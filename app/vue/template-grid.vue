@@ -147,7 +147,7 @@ module.exports = {
 						/>
 						<div></div>
 					</label>
-					<div v-else-if="key.label == 'Шаблоны' && showFavoritesOnly" style="display:flex;">
+					<div v-else-if="key.label == 'Шаблоны'" style="display:flex;">
 						<download-template-button
 							v-for="type in entry.mouType == 'mfc' ? ['federal','municipal','regional','otherServices','windowsAndEmployee'] : ['federal','otherServices','windowsAndEmployee']"
 							v-bind:key="type"
@@ -156,8 +156,7 @@ module.exports = {
 							:mou-type="entry.mouType"
 							:mou-id="entry.id"
 							:mou-name="entry.shortName || entry.full_name"
-							:template-type="type"
-						></download-template-button>
+							:template-type="type"></download-template-button>
 					</div>
 					<template
 						v-else-if="key.field == 'urban_area' || key.field == 'urban_district'"
