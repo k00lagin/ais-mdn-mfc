@@ -153,7 +153,7 @@ th.active .arrow {
 
 td {
 	position: relative;
-	overflow: hidden;
+	/* overflow: hidden; */
 }
 
 .favorite-only .column__is_favorite {

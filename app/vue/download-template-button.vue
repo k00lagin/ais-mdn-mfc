@@ -1,8 +1,16 @@
 <template>
-	<button type="button" class="at-tag__text downloadTemplateLabel" :title="templateTypeLocale[templateType]" @click="handleDownloadClick"
-		v-bind:class="{ hasData: errors != null, 'at-tag--success': errors == 0, 'at-tag--error': errors > 0 }" >
-		{{ templateTypeLocale[templateType].substr(0, 1) }}
-	</button>
+	<at-popover trigger="hover" placement="bottom" :title="countErrors != null ? templateTypeLocale[templateType]: undefined" :content="countErrors == null ? templateTypeLocale[templateType]: undefined">
+		<button type="button" class="at-tag__text downloadTemplateLabel" @click="handleDownloadClick"
+			v-bind:class="{ hasData: countErrors != null, 'at-tag--success': countErrors == 0, 'at-tag--error': countErrors > 0 }" >
+			{{ templateTypeLocale[templateType].substr(0, 1) }}
+		</button>
+		<template slot="content" v-if="countErrors != null">
+			<p>Дата загрузки: {{ this.uploads.items[0].template.createDate | datetime }}</p>
+			<div v-if="countErrors > 0">
+				<div v-for="(error, key) in this.uploads.items[0].uploadFile.errors" v-bind:key="key">{{ error }}</div>
+			</div>
+		</template>
+	</at-popover>
 </template>
 
 <script>
@@ -18,7 +26,7 @@
 		data: function() {
 			return {
 				uploads: null,
-				errors: null,
+				countErrors: null,
 				templateTypeLocale: {
 					"federal": "Федеральные услуги",
 					"municipal": "Муниципальные услуги",
@@ -41,7 +49,7 @@
 				})
 			},
 			getData: function () {
-				this.errors = null;
+				this.countErrors = null;
 				this.uploads = null;
 				if (typeof(this.year) == "number" && typeof(this.month) == "number") {
 					app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType='+this.templateType+'&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data, "uploads");
@@ -71,10 +79,10 @@
 			},
 			uploads: function () {
 				if (this.uploads && this.uploads.items && this.uploads.items[0] && this.uploads.items[0].uploadFile) {
-					this.errors = this.uploads.items[0].uploadFile.countErrors;
+					this.countErrors = this.uploads.items[0].uploadFile.countErrors;
 				}
 				else {
-					this.errors = null;
+					this.countErrors = null;
 				}
 			}
 		},
