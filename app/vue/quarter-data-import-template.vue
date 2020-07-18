@@ -52,20 +52,20 @@
 											<template slot="content">
 												<p v-for="error in item.uploadFile.errors">{{ error }}</p>
 											</template>
-									</at-popover>									
+									</at-popover>
 								</template>
 								<template v-else>
 									<a :href="'https://моидокументы.рф/mfc/ws/file/view/' + item.uploadFile.fileId">{{ item.uploadFile.fileName }}</a>
-									<at-badge  class="success_badge" status="success" value="✓"></at-badge>									
+									<at-badge  class="success_badge" status="success" value="✓"></at-badge>
 								</template>
-							</td>							
+							</td>
 
 						</tr>
 					</template>
 				</tbody>
 			</template>
 		</table>
-	</div>	
+	</div>
 </template>
 <script>
 	module.exports = {
@@ -159,7 +159,7 @@
 				app.fetchData('https://моидокументы.рф/mfc/ws/quarterDataExcel/getTemplatesList?rf_subject=80&year='+this.year+'&month='+this.month+'&formType=windowsAndEmployee&importType=mou&mouType=' + this.mouType + '&mouId=' + this.mouId, this.$data.uploads, 'windowsAndEmployee');
 			}
 		}
-	};	
+	};
 </script>
 <style>
 .success_badge,
