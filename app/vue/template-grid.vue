@@ -111,9 +111,7 @@ module.exports = {
 		//console.log('COLUMNS IN GRID - ' + this.columns);
 	},
 	components: {
-		"download-template-button": httpVueLoader(
-			"vue/download-template-button.vue"
-		),
+		"download-template-bar": httpVueLoader("vue/download-template-bar.vue"),
 		"fill-templates": httpVueLoader("vue/fill-templates.vue")
 	}
 };
@@ -139,7 +137,11 @@ module.exports = {
 		<tbody>
 			<tr v-for="entry in filteredData" :id="entry.id" v-bind:key="entry.id">
 				<td v-for="key in columns" :class="'column__' + key.field" v-bind:key="key.field">
-					<label v-if="key.label == ' '" class="is_favorite" :title="favoriteList[entry.id] == true?'Удалить из избранного':'Добавить в избранное'">
+					<label
+						v-if="key.label == ' '"
+						class="is_favorite"
+						:title="favoriteList[entry.id] == true?'Удалить из избранного':'Добавить в избранное'"
+					>
 						<input
 							type="checkbox"
 							@change="handleFavoriteClick"
@@ -147,17 +149,15 @@ module.exports = {
 						/>
 						<div></div>
 					</label>
-					<div v-else-if="key.label == 'Шаблоны'" style="display:flex;">
-						<download-template-button
-							v-for="type in entry.mouType == 'mfc' ? ['federal','municipal','regional','otherServices','windowsAndEmployee'] : ['federal','otherServices','windowsAndEmployee']"
-							v-bind:key="type"
+					<template v-else-if="key.label == 'Шаблоны'">
+						<download-template-bar
 							:year="Number(year)"
 							:month="Number(month)"
 							:mou-type="entry.mouType"
 							:mou-id="entry.id"
 							:mou-name="entry.shortName || entry.full_name"
-							:template-type="type"></download-template-button>
-					</div>
+						/>
+					</template>
 					<template
 						v-else-if="key.field == 'urban_area' || key.field == 'urban_district'"
 					>{{ dictionarySubjectName[entry[key.field]] }}</template>
@@ -172,7 +172,7 @@ module.exports = {
 							v-if="$route.path == '/mou_common_data'"
 							:to="'/common_data/' + entry.mouType + '/' + entry.id"
 							class="textBtn"
-						>{{ (showFavoritesOnly && entry.mouType ==='urm' &&  entry['shortName']) ? entry['shortName'].replace(entry['shortName'].match(/[А-ЯЁ][А-ЯЁа-яё-]+ района/), '') : entry['shortName'] || entry[key.field] }}</router-link>
+						>{{ (showFavoritesOnly && entry.mouType ==='urm' && entry['shortName']) ? entry['shortName'].replace(entry['shortName'].match(/[А-ЯЁ][А-ЯЁа-яё-]+ района/), '') : entry['shortName'] || entry[key.field] }}</router-link>
 					</template>
 					<template v-else-if="key.field == 'start_date'">{{ entry[key.field] | date }}</template>
 					<span v-else>{{ entry[key.field] }}</span>
