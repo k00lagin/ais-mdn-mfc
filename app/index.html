@@ -144,39 +144,25 @@
 			</div>
 		</script>
 		<div id="app">
-			<header v-if="currentUser">
+			<at-menu class="menu" v-if="currentUser" mode="horizontal" router="router">
+				<at-menu-item to="/mou_template_list">Шаблоны</at-menu-item>
+				<at-menu-item to="/mou_common_data">Информация</at-menu-item>
 				<div class="spacer"></div>
 				<template>
-					<router-link to="/user_settings" class="userfio textBtn"
-						>{{ currentUser.fio }}</router-link
-					>
-					<a
+					<at-menu-item to="/user_settings">{{ currentUser.fio }}</at-menu-item>
+					<at-menu-item><a
 						@click.prevent="logout"
-						class="logout textBtn"
 						href="https://моидокументы.рф/mfc/ws/auth/logout"
-						>Выход</a
-					>
+						>Выход</a>
+					</at-menu-item>
 				</template>
-			</header>
+			</at-menu>
 			<div v-if="currentUser" class="main">
-				<div class="menu">
-					<at-menu mode="vertical" router="router">
-						<!-- <at-menu-item-group title=""> -->
-							<at-menu-item to="/mou_template_list">Шаблоны</at-menu-item>
-							<!-- <at-menu-item to="/urm_template_list">ТОСП</at-menu-item> -->
-							<!-- <at-menu-item to="/fill_templates">Заполнение</at-menu-item> -->
-						</at-menu-item-group>
-						<!-- <at-menu-item-group title=""> -->
-							<at-menu-item to="/mou_common_data">Подсистемы сбора информации</at-menu-item>
-							<!-- <at-menu-item to="/urm_common_data">ТОСП</at-menu-item> -->
-						</at-menu-item-group>
-					</at-menu>
-					<span class="version">v:{{ version }}</span>
-				</div>
 				<router-view
 					class="display"
 					style="overflow-y: auto; overflow-x: hidden;"
 				></router-view>
+				<span class="version">v:{{ version }}</span>
 			</div>
 			<login v-else @auth="updateLogin"></login>
 		</div>
@@ -279,10 +265,10 @@
 							label: "Название",
 							field: "full_name"
 						},
-						{
+						/*{
 							label: "Адрес",
 							field: "address"
-						},
+						},*/
 						{
 							label: "Дата открытия",
 							field: "start_date"
@@ -302,10 +288,10 @@
 							label: "Название",
 							field: "full_name"
 						},
-						{
+						/*{
 							label: "Адрес",
 							field: "address"
-						},
+						},*/
 						{
 							label: "Шаблоны",
 							field: "id",

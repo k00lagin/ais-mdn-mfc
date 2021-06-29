@@ -75,10 +75,7 @@ header {
 */
 
 .menu {
-	/border: 1px solid var(--spacer_color);
-}
-.menu > .at-menu {
-	height: 100%;
+	display: flex;
 }
 
 /*
