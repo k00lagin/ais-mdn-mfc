@@ -23,7 +23,7 @@
 			<at-button @click="saveNewPassword" icon="icon-save" circle size="small"></at-button>
 			<at-button @click="cancelEditPassword" icon="icon-x" circle size="small"></at-button>
 		</div>
-		<at-button v-if="!isEditPassword" size="small"  @click="isEditPassword=true">Сменить пароль</at-button>
+		<at-button v-if="!isEditPassword" size="small"	@click="isEditPassword=true">Сменить пароль</at-button>
 	</div>
 </template>
 
@@ -41,13 +41,13 @@
 			},
 		},
 		data: function () {
-	    return {
+			return {
 			isEditFio: false,
 			fio: null,
 			isEditPassword: false,
 			isPasswordMasked: true,
 			password: null,
-	    }},
+			}},
 		methods: {
 			unmaskPassword: function() {
 				this.isPasswordMasked = false;

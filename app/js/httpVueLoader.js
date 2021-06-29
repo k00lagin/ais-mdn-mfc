@@ -443,7 +443,7 @@
 
 			var xhr = new XMLHttpRequest();
 			xhr.open('GET', url);
-            		xhr.responseType = 'text';
+			xhr.responseType = 'text';
 
 			xhr.onreadystatechange = function() {
 

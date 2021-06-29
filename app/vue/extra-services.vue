@@ -13,24 +13,24 @@ module.exports = {
 		return {
 			columns: [
 				{
-        	title: 'Название',
-        	key: 'name'
+					title: 'Название',
+					key: 'name'
 				},
 				{
-        	title: 'Да/Нет',
-        	key: 'is_provided'
+					title: 'Да/Нет',
+					key: 'is_provided'
 				},
 				{
-        	title: 'Комментарий',
-        	key: 'comment'
+					title: 'Комментарий',
+					key: 'comment'
 				},
 				{
-        	title: 'Да/Нет',
-        	key: 'is_provided_mer'
+					title: 'Да/Нет',
+					key: 'is_provided_mer'
 				},
 				{
-        	title: 'Комментарий куратора',
-        	key: 'comment_mer'
+					title: 'Комментарий куратора',
+					key: 'comment_mer'
 				},
 			],
 			services: undefined,

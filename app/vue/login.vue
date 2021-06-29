@@ -80,7 +80,6 @@
 		}
 	};
 </script>
-
 <style scoped>
 	.login {
 		width: 200px;

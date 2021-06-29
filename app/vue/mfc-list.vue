@@ -68,7 +68,6 @@ module.exports = {
 	}
 };
 </script>
-
 <template>
 	<div>
 		<div v-if="this.columns === 'templateListColumns'">
