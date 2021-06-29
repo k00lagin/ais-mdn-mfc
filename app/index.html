@@ -460,13 +460,12 @@
 										}
 										if (
 											newUrmList[i].full_name.indexOf(
-												"Челябинская область "
+												'Отдел областного ГАУ "МФЦ Челябинской области"'
 											) === 0
 										) {
 											newUrmList[i].shortName = newUrmList[i].full_name
-												.substr(20)
-												.split(" муниципального района ")
-												.join(" района ");
+												.replace(' областного ГАУ "МФЦ Челябинской области"', '')
+												.replace(" муниципального района", " района");
 										}
 									});
 									app.urmList = newUrmList;
@@ -512,9 +511,8 @@
 											) >= 0
 										) {
 											newMfcList[i].shortName = newMfcList[i].full_name
-												.replace(' Челябинской области МФЦ', '')
-												.replace(' Челябинской области "МФЦ"', '')
-												.replace(" муниципального района", " района")
+												.replace(' областного ГАУ "МФЦ Челябинской области"', '')
+												.replace(" муниципальном районе", " районе")
 												.replace(newMfcList[i].full_name.match(/[А-Я][А-Я]?([А-Я])/)[0], newMfcList[i].full_name.match(/[А-Я][А-Я]?([А-Я])/)[0] + " МФЦ");
 										}
 									});
