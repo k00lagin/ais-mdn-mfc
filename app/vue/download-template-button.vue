@@ -1,7 +1,11 @@
 <template>
-	<at-popover trigger="hover" placement="bottom" :title="countErrors != null ? templateTypeLocale[templateType]: undefined" :content="countErrors == null ? templateTypeLocale[templateType]: undefined">
+	<at-popover trigger="hover" placement="bottom-right" :title="countErrors != null ? templateTypeLocale[templateType]: undefined" :content="countErrors == null ? templateTypeLocale[templateType]: undefined">
 		<button type="button" class="at-tag__text downloadTemplateLabel" @click="handleDownloadClick"
-			v-bind:class="{ hasData: countErrors != null, 'at-tag--success': countErrors == 0, 'at-tag--error': countErrors > 0 }" >
+			v-bind:class="{ 'hasData': countErrors != null,
+				'at-tag--success': countErrors == 0,
+				'at-tag--error': countErrors > 0,
+				'first': templateType === 'federal',
+				'last': templateType === 'windowsAndEmployee' }" >
 			{{ templateTypeLocale[templateType].substr(0, 1) }}
 		</button>
 		<template slot="content" v-if="countErrors != null">
@@ -95,11 +99,11 @@
 		border-width: 1px;
 		padding: 2px 4px;
 	}
-	.downloadTemplateLabel:first-child {
+	.downloadTemplateLabel.first {
 		border-top-left-radius: 2px;
 		border-bottom-left-radius: 2px;
 	}
-	.downloadTemplateLabel:last-child {
+	.downloadTemplateLabel.last {
 		border-top-right-radius: 2px;
 		border-bottom-right-radius: 2px;
 	}
