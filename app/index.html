@@ -76,7 +76,8 @@
 						});
 					},
 					fetchAndSave: function(url, path) {
-						fetch(url, {
+						return new Promise((resolve, reject) => {
+							fetch(url, {
 							credentials: "same-origin"
 						})
 							.then(response => {
@@ -93,12 +94,15 @@
 										console.log(err);
 									} else {
 										console.log("The file was saved!");
+										resolve(path);
 									}
 								});
 							})
 							.catch(error => {
 								throw new Error(error);
+								reject(error);
 							});
+						});
 					},
 					sendMultiformData: function(url, form, callback) {
 						//TODO https://www.npmjs.com/package/form-data
